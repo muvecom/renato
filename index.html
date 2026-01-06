@@ -185,6 +185,7 @@
                 try {
                     // Primeiro tenta o endpoint principal
                     chatsData = await fetchFromAPI(CONFIG.OMNICHAT_API_URL);
+                    console.log('Dados das conversas recebidos:', chatsData?.length || 0, 'itens');
                 } catch (error) {
                     console.warn('Erro no endpoint principal:', error);
                     throw new Error(`Falha ao conectar com a API OmniChat: ${error.message}`);
@@ -194,10 +195,11 @@
                     // Tenta o endpoint de agentes (se configurado e se não for o mesmo URL)
                     if (CONFIG.AGENTS_API_URL && CONFIG.AGENTS_API_URL !== CONFIG.OMNICHAT_API_URL) {
                         agentsData = await fetchFromAPI(CONFIG.AGENTS_API_URL);
+                        console.log('Dados dos agentes recebidos:', agentsData?.length || 0, 'itens');
                     }
                 } catch (error) {
                     console.warn('Endpoint de agentes falhou, usando dados das conversas:', error);
-                    agentsData = chatsData; // Usa os mesmos dados
+                    // Não lança erro, tenta usar os dados das conversas para extrair agentes
                 }
 
                 // Processa os dados
@@ -211,7 +213,7 @@
                     chats: chatsData,
                     agents: agentsData,
                     timestamp: new Date().toISOString(),
-                    totalChats: chatsData.length || 0
+                    totalChats: chatsData?.length || 0
                 };
                 
             } catch (error) {
@@ -241,17 +243,34 @@
             
             const data = await response.json();
             
-            // Verifica se é array (formato OmniChat) ou se tem propriedade data
+            // Verifica o formato dos dados recebidos
+            console.log('Formato de dados recebido:', Array.isArray(data) ? 'Array' : 'Objeto');
+            
+            // A API OmniChat retorna array diretamente
             if (Array.isArray(data)) {
-                return data; // Formato direto da API
-            } else if (data.data && Array.isArray(data.data)) {
-                return data.data; // Formato envelopado
-            } else if (data.results && Array.isArray(data.results)) {
-                return data.results; // Outro formato possível
-            } else {
-                console.warn('Formato de dados inesperado:', data);
-                return []; // Retorna array vazio para não quebrar
+                return data;
+            } else if (typeof data === 'object') {
+                // Se for objeto, tenta extrair array de propriedades comuns
+                if (data.data && Array.isArray(data.data)) {
+                    return data.data;
+                } else if (data.results && Array.isArray(data.results)) {
+                    return data.results;
+                } else if (data.items && Array.isArray(data.items)) {
+                    return data.items;
+                } else if (data.chats && Array.isArray(data.chats)) {
+                    return data.chats;
+                } else if (data.agents && Array.isArray(data.agents)) {
+                    return data.agents;
+                } else {
+                    // Se não encontrar array, converte o objeto em array
+                    console.warn('Dados não são um array, convertendo objeto:', Object.keys(data));
+                    return [data];
+                }
             }
+            
+            // Fallback: retorna array vazio
+            console.warn('Formato de dados inesperado, retornando array vazio');
+            return [];
         }
 
         // ============================================================================
@@ -260,13 +279,16 @@
         function processAllData(chatsData, agentsData) {
             // Garante que temos arrays
             const chats = Array.isArray(chatsData) ? chatsData : [];
-            const agentsInput = Array.isArray(agentsData) ? agentsData : chats; // Fallback
+            const agentsInput = Array.isArray(agentsData) ? agentsData : [];
+            
+            console.log(`Processando ${chats.length} conversas e ${agentsInput.length} agentes do endpoint`);
             
             // Armazena dados globais
             allChats = chats;
             
             // Extrai agentes dos dados
             allAgents = extractAgentsFromData(chats, agentsInput);
+            console.log(`Total de agentes extraídos: ${allAgents.length}`);
             
             // Atualiza KPIs
             updateKPIs(chats, allAgents);
@@ -279,7 +301,26 @@
         function extractAgentsFromData(chats, agentsInput) {
             const agentsMap = new Map();
             
-            // 1. Extrai dos usuários nas conversas
+            // 1. Processa agentes do endpoint específico (se fornecido)
+            if (Array.isArray(agentsInput) && agentsInput.length > 0) {
+                agentsInput.forEach(agent => {
+                    if (agent.objectId) {
+                        agentsMap.set(agent.objectId, {
+                            id: agent.objectId,
+                            name: agent.name || 'Agente',
+                            lastName: agent.lastName || '',
+                            email: agent.email || '--',
+                            picture: agent.picture,
+                            type: 'agente',
+                            status: agent.disabled === false ? 'ativo' : (agent.disabled === true ? 'inativo' : 'ativo'),
+                            createdAt: agent.createdAt,
+                            source: 'endpoint'
+                        });
+                    }
+                });
+            }
+            
+            // 2. Extrai dos usuários nas conversas
             chats.forEach(chat => {
                 if (chat.user && chat.user.objectId) {
                     const agentId = chat.user.objectId;
@@ -291,14 +332,15 @@
                             email: chat.user.email || '--',
                             picture: chat.user.picture,
                             type: 'atendente',
-                            status: chat.user.disabled === false ? 'ativo' : 'inativo',
+                            status: chat.user.disabled === false ? 'ativo' : (chat.user.disabled === true ? 'inativo' : 'ativo'),
                             lastActivity: chat.updatedAt,
-                            createdAt: chat.user.createdAt || chat.createdAt
+                            createdAt: chat.user.createdAt || chat.createdAt,
+                            source: 'chat_user'
                         });
                     }
                 }
                 
-                // 2. Extrai do customerSupportRequest
+                // 3. Extrai do customerSupportRequest
                 if (chat.customerSupportRequest) {
                     const csr = chat.customerSupportRequest;
                     if (csr.contactedBy && csr.contactedBy.objectId) {
@@ -312,12 +354,13 @@
                                 type: 'contatado_por',
                                 status: 'ativo',
                                 lastActivity: csr.updatedAt,
-                                createdAt: chat.createdAt
+                                createdAt: chat.createdAt,
+                                source: 'csr_contactedBy'
                             });
                         }
                     }
                     
-                    // 3. Participating Users
+                    // 4. Participating Users
                     if (csr.participatingUsers && Array.isArray(csr.participatingUsers)) {
                         csr.participatingUsers.forEach(user => {
                             if (user.objectId && !agentsMap.has(user.objectId)) {
@@ -328,14 +371,15 @@
                                     email: '--',
                                     type: 'participante',
                                     status: 'ativo',
-                                    createdAt: chat.createdAt
+                                    createdAt: chat.createdAt,
+                                    source: 'csr_participating'
                                 });
                             }
                         });
                     }
                 }
                 
-                // 4. Equipe
+                // 5. Equipe
                 if (chat.team && chat.team.users) {
                     chat.team.users.forEach(user => {
                         if (user.objectId && !agentsMap.has(user.objectId)) {
@@ -346,32 +390,19 @@
                                 email: '--',
                                 type: 'equipe',
                                 status: 'ativo',
-                                createdAt: chat.team.createdAt || chat.createdAt
+                                createdAt: chat.team.createdAt || chat.createdAt,
+                                source: 'team_member'
                             });
                         }
                     });
                 }
             });
             
-            // 5. Adiciona agentes do endpoint específico (se disponível)
-            if (Array.isArray(agentsInput) && agentsInput !== chats) {
-                agentsInput.forEach(agent => {
-                    if (agent.objectId && !agentsMap.has(agent.objectId)) {
-                        agentsMap.set(agent.objectId, {
-                            id: agent.objectId,
-                            name: agent.name || 'Agente',
-                            lastName: agent.lastName || '',
-                            email: agent.email || '--',
-                            picture: agent.picture,
-                            type: 'agente',
-                            status: agent.disabled === false ? 'ativo' : 'inativo',
-                            createdAt: agent.createdAt
-                        });
-                    }
-                });
-            }
+            // Converte para array e ordena por nome
+            const agentsArray = Array.from(agentsMap.values());
+            agentsArray.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
             
-            return Array.from(agentsMap.values());
+            return agentsArray;
         }
 
         function renderAgentsTable(agents) {
@@ -402,7 +433,7 @@
                 
                 // Tipo badge
                 let typeBadge = '';
-                if (agent.type === 'atendente') {
+                if (agent.type === 'agente' || agent.type === 'atendente') {
                     typeBadge = '<span class="badge badge-info">Atendente</span>';
                 } else if (agent.type === 'equipe') {
                     typeBadge = '<span class="badge" style="background:#f3e8ff;color:#7c3aed;">Equipe</span>';
@@ -604,24 +635,25 @@
         // ============================================================================
         function updateKPIs(chats, agents) {
             // Total de conversas
-            document.getElementById('kpiTotalChats').textContent = chats.length;
+            const totalChats = chats?.length || 0;
+            document.getElementById('kpiTotalChats').textContent = totalChats;
             
             // Conversas ativas (não finalizadas)
-            const activeChats = chats.filter(chat => 
+            const activeChats = chats?.filter(chat => 
                 chat.status !== 'FINISHED' && 
                 (!chat.customerSupportRequest || chat.customerSupportRequest.status !== 'FINISHED')
-            ).length;
+            ).length || 0;
             document.getElementById('kpiActiveChats').textContent = activeChats;
             
             // Aguardando atendimento
-            const waitingChats = chats.filter(chat => 
+            const waitingChats = chats?.filter(chat => 
                 chat.status === 'TEAM' || 
                 (chat.customerSupportRequest && chat.customerSupportRequest.status === 'WAITING')
-            ).length;
+            ).length || 0;
             document.getElementById('kpiWaiting').textContent = waitingChats;
             
             // Agentes ativos (com status ativo)
-            const activeAgents = agents.filter(agent => agent.status === 'ativo').length;
+            const activeAgents = agents?.filter(agent => agent.status === 'ativo').length || 0;
             document.getElementById('kpiAgents').textContent = activeAgents;
         }
 
