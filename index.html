@@ -5,116 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard OmniChat</title>
     <style>
+        /* CSS otimizado para GitHub Pages */
         :root {
-            --primary: #3a86ff;
-            --secondary: #8338ec;
-            --success: #38b000;
-            --danger: #ff006e;
-            --warning: #ffbe0b;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #d97706;
+            --gray: #6b7280;
+            --light: #f9fafb;
+            --dark: #111827;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
         
         body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            color: var(--dark);
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
         }
         
-        /* Card principal */
         .card {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
         
-        /* Header */
         .header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: var(--primary);
             color: white;
-            padding: 30px;
-            text-align: center;
+            padding: 25px;
         }
         
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 24px;
+            margin-bottom: 5px;
         }
         
         .header p {
             opacity: 0.9;
-            font-size: 1.1rem;
         }
         
-        /* Conteúdo principal */
         .content {
-            padding: 30px;
+            padding: 25px;
         }
         
-        /* Status e controles */
-        .status-bar {
-            background: var(--light);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 5px solid var(--primary);
-        }
-        
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .alert {
+            background: var(--warning);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
             font-weight: bold;
         }
         
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--gray);
-        }
-        
-        .status-dot.online {
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
-        
-        .status-dot.offline {
-            background: var(--danger);
+        .alert a {
+            color: white;
+            text-decoration: underline;
         }
         
         .controls {
             display: flex;
             gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
         }
         
-        .btn {
+        button {
             padding: 12px 24px;
             border: none;
-            border-radius: 10px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.2s;
         }
         
         .btn-primary {
@@ -122,213 +99,256 @@
             color: white;
         }
         
-        .btn-primary:hover {
-            background: #2a76ff;
-            transform: translateY(-2px);
+        .btn-primary:hover:not(:disabled) {
+            background: #1d4ed8;
+            transform: translateY(-1px);
         }
         
         .btn-secondary {
             background: var(--light);
             color: var(--dark);
+            border: 1px solid #d1d5db;
         }
         
         .btn-secondary:hover {
-            background: #e9ecef;
+            background: #f3f4f6;
         }
         
-        .btn:disabled {
-            opacity: 0.6;
+        button:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
-            transform: none !important;
         }
         
-        /* Grid de KPIs */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--gray);
+        }
+        
+        .status.connected {
+            border-left-color: var(--success);
+        }
+        
+        .status.error {
+            border-left-color: var(--danger);
+        }
+        
+        .status.loading {
+            border-left-color: var(--warning);
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-dot.online {
+            background: var(--success);
+        }
+        
+        .status-dot.offline {
+            background: var(--danger);
+        }
+        
+        .status-dot.loading {
+            background: var(--warning);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .error-box {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--danger);
+        }
+        
+        .error-details {
+            background: rgba(220, 38, 38, 0.1);
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
         
         .kpi-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border: 1px solid #eee;
-            transition: transform 0.3s;
-        }
-        
-        .kpi-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .kpi-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: var(--primary);
+            background: var(--light);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
         }
         
         .kpi-value {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--dark);
-            margin-bottom: 5px;
+            font-size: 36px;
+            font-weight: 800;
+            margin: 10px 0;
+            color: var(--primary);
         }
         
         .kpi-label {
             color: var(--gray);
-            font-size: 1rem;
-            font-weight: 500;
-        }
-        
-        /* Tabelas */
-        .table-section {
-            margin-top: 40px;
-        }
-        
-        .table-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-top: 20px;
-            overflow-x: auto;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-top: 15px;
         }
         
         th {
             background: var(--light);
-            color: var(--dark);
-            font-weight: 600;
-            padding: 15px;
             text-align: left;
-            border-bottom: 2px solid #dee2e6;
+            padding: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid #e5e7eb;
         }
         
         td {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
         }
         
         tr:hover {
-            background: #f8f9fa;
+            background: #f9fafb;
         }
         
         .badge {
-            padding: 5px 12px;
+            display: inline-block;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: bold;
+            font-size: 13px;
+            font-weight: 600;
         }
         
         .badge-success {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .badge-warning {
-            background: #fff3cd;
-            color: #856404;
+            background: #dcfce7;
+            color: #166534;
         }
         
         .badge-danger {
-            background: #f8d7da;
-            color: #721c24;
+            background: #fee2e2;
+            color: #991b1b;
         }
         
-        /* Loading */
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 50px 20px;
             color: var(--gray);
         }
         
         .loading-spinner {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border: 3px solid #f3f3f3;
             border-top: 3px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
         }
         
-        /* Alertas */
-        .alert {
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+            font-style: italic;
+        }
+        
+        .raw-data {
+            background: var(--light);
             padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border-left: 5px solid;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
         }
         
-        .alert-info {
-            background: #e3f2fd;
-            border-left-color: var(--primary);
-            color: #0c5460;
+        .raw-data pre {
+            margin: 0;
         }
         
-        .alert-warning {
-            background: #fff3cd;
-            border-left-color: var(--warning);
-            color: #856404;
+        .section {
+            margin: 30px 0;
         }
         
-        /* Animações */
+        .section h2 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 20px;
+        }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
         
         @keyframes pulse {
-            0% { opacity: 1; }
+            0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
-            100% { opacity: 1; }
         }
         
-        /* Responsivo */
         @media (max-width: 768px) {
-            .header h1 { font-size: 2rem; }
-            .kpi-value { font-size: 2.5rem; }
-            .status-bar { flex-direction: column; gap: 15px; }
-            .controls { width: 100%; }
-            .btn { flex: 1; justify-content: center; }
-            .content { padding: 20px; }
-        }
-        
-        /* Modo escuro opcional */
-        @media (prefers-color-scheme: dark) {
-            .card {
-                background: #1a1a1a;
-                color: white;
+            .container {
+                padding: 10px;
             }
             
-            .kpi-card, .table-card {
-                background: #2d2d2d;
-                border-color: #444;
+            .content {
+                padding: 15px;
             }
             
-            .kpi-value {
-                color: white;
+            .controls {
+                flex-direction: column;
             }
             
-            th {
-                background: #2d2d2d;
-                color: white;
-                border-color: #444;
+            button {
+                width: 100%;
+                justify-content: center;
             }
             
-            td {
-                border-color: #444;
+            .kpi-grid {
+                grid-template-columns: 1fr;
             }
             
-            tr:hover {
-                background: #333;
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 12px 8px;
             }
         }
     </style>
@@ -336,485 +356,408 @@
 <body>
     <div class="container">
         <div class="card">
-            <!-- Header -->
             <div class="header">
                 <h1>📊 Dashboard OmniChat</h1>
-                <p>Monitoramento em tempo real dos atendentes e conversas</p>
+                <p>Monitoramento em tempo real • Dados da API oficial</p>
             </div>
             
-            <!-- Conteúdo principal -->
             <div class="content">
-                <!-- Alertas informativos -->
-                <div class="alert alert-info">
-                    <strong>⚠️ Atenção:</strong> Este dashboard funciona diretamente no GitHub Pages. 
-                    Todas as chamadas de API são feitas através de um proxy seguro.
+                <div class="alert">
+                    ⚠️ <strong>Atenção:</strong> Este dashboard está publicamente visível no GitHub Pages.
+                    As credenciais de API estão temporariamente expostas para testes.
                 </div>
                 
-                <!-- Status e controles -->
-                <div class="status-bar">
-                    <div class="status">
-                        <div class="status-dot offline" id="statusDot"></div>
-                        <span id="statusText">Clique em "Conectar" para começar</span>
-                    </div>
-                    <div class="controls">
-                        <button class="btn btn-secondary" onclick="showConfig()">
-                            ⚙️ Configurar
-                        </button>
-                        <button class="btn btn-primary" onclick="connectToAPI()" id="connectBtn">
-                            🔌 Conectar à API
-                        </button>
-                    </div>
+                <div class="controls">
+                    <button class="btn-primary" onclick="loadAllData()" id="loadBtn">
+                        🔄 Carregar Dados da API
+                    </button>
+                    <button class="btn-secondary" onclick="toggleRawData()">
+                        📄 Ver Resposta Bruta
+                    </button>
                 </div>
                 
-                <!-- Modal de configuração -->
-                <div id="configModal" style="display: none;">
-                    <div class="table-card">
-                        <h3>⚙️ Configuração do Proxy</h3>
-                        <p style="margin: 15px 0; color: var(--gray);">
-                            Para evitar problemas de CORS, usamos um proxy. Você pode:
-                        </p>
-                        <div style="background: var(--light); padding: 20px; border-radius: 10px; margin: 15px 0;">
-                            <p><strong>Opção 1 (Recomendada):</strong> Use nosso proxy público</p>
-                            <p><strong>Opção 2:</strong> Crie seu próprio proxy no n8n ou similar</p>
-                        </div>
-                        <div style="display: flex; gap: 10px; margin-top: 20px;">
-                            <button class="btn btn-primary" onclick="usePublicProxy()">
-                                Usar Proxy Público
-                            </button>
-                            <button class="btn btn-secondary" onclick="hideConfig()">
-                                Cancelar
-                            </button>
-                        </div>
-                    </div>
+                <div class="status-bar" id="statusBar">
+                    <div class="status-dot offline" id="statusDot"></div>
+                    <span id="statusText">Clique para carregar dados reais</span>
                 </div>
                 
-                <!-- Grid de KPIs -->
+                <div class="error-box" id="errorBox" style="display: none;">
+                    <strong>❌ Erro na API:</strong>
+                    <div id="errorMessage"></div>
+                    <div class="error-details" id="errorDetails" style="display: none;"></div>
+                </div>
+                
                 <div class="kpi-grid">
                     <div class="kpi-card">
-                        <div class="kpi-icon">👥</div>
-                        <div class="kpi-value" id="totalAgents">0</div>
-                        <div class="kpi-label">Atendentes Totais</div>
+                        <div class="kpi-value" id="kpiAgents">0</div>
+                        <div class="kpi-label">Atendentes</div>
                     </div>
-                    
                     <div class="kpi-card">
-                        <div class="kpi-icon">💬</div>
-                        <div class="kpi-value" id="totalChats">0</div>
-                        <div class="kpi-label">Conversas Hoje</div>
+                        <div class="kpi-value" id="kpiChats">0</div>
+                        <div class="kpi-label">Conversas</div>
                     </div>
-                    
                     <div class="kpi-card">
-                        <div class="kpi-icon">⏱️</div>
-                        <div class="kpi-value" id="avgResponse">--</div>
-                        <div class="kpi-label">Tempo Médio</div>
+                        <div class="kpi-value" id="kpiOnline">0</div>
+                        <div class="kpi-label">Ativos</div>
                     </div>
-                    
                     <div class="kpi-card">
-                        <div class="kpi-icon">📈</div>
-                        <div class="kpi-value" id="satisfaction">--%</div>
-                        <div class="kpi-label">Satisfação</div>
+                        <div class="kpi-value" id="kpiUpdated">--:--</div>
+                        <div class="kpi-label">Atualizado</div>
                     </div>
                 </div>
                 
-                <!-- Tabela de Atendentes -->
-                <div class="table-section">
-                    <h2>🎯 Atendentes</h2>
-                    <div class="table-card">
-                        <div class="loading" id="agentsLoading">
-                            <div class="loading-spinner"></div>
-                            <p>Carregando dados dos atendentes...</p>
-                        </div>
-                        <table id="agentsTable" style="display: none;">
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Status</th>
-                                    <th>Email</th>
-                                    <th>Última Atividade</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="agentsTableBody">
-                                <!-- Dados serão inseridos aqui -->
-                            </tbody>
-                        </table>
+                <div class="section">
+                    <h2>👥 Atendentes</h2>
+                    <div class="loading" id="loadingAgents">
+                        <div class="loading-spinner"></div>
+                        <p>Carregando dados dos atendentes...</p>
                     </div>
+                    <div id="emptyAgents" class="empty-state" style="display: none;">
+                        Nenhum atendente encontrado
+                    </div>
+                    <table id="agentsTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Status</th>
+                                <th>Email</th>
+                                <th>Criado em</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agentsTableBody"></tbody>
+                    </table>
                 </div>
                 
-                <!-- Tabela de Conversas -->
-                <div class="table-section">
+                <div class="section">
                     <h2>💬 Conversas Recentes</h2>
-                    <div class="table-card">
-                        <div class="loading" id="chatsLoading">
-                            <div class="loading-spinner"></div>
-                            <p>Carregando conversas...</p>
-                        </div>
-                        <table id="chatsTable" style="display: none;">
-                            <thead>
-                                <tr>
-                                    <th>Cliente</th>
-                                    <th>Canal</th>
-                                    <th>Status</th>
-                                    <th>Última Mensagem</th>
-                                    <th>Atendente</th>
-                                </tr>
-                            </thead>
-                            <tbody id="chatsTableBody">
-                                <!-- Dados serão inseridos aqui -->
-                            </tbody>
-                        </table>
+                    <div class="loading" id="loadingChats">
+                        <div class="loading-spinner"></div>
+                        <p>Carregando conversas...</p>
                     </div>
+                    <div id="emptyChats" class="empty-state" style="display: none;">
+                        Nenhuma conversa encontrada
+                    </div>
+                    <table id="chatsTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Plataforma</th>
+                                <th>Status</th>
+                                <th>Última Mensagem</th>
+                                <th>Criada</th>
+                            </tr>
+                        </thead>
+                        <tbody id="chatsTableBody"></tbody>
+                    </table>
+                </div>
+                
+                <div class="raw-data" id="rawData">
+                    <strong>📄 Resposta Bruta da API:</strong>
+                    <pre id="rawDataContent"></pre>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // CONFIGURAÇÃO DO DASHBOARD
-        // ============================================
-        
-        // Proxy público temporário (funciona no GitHub Pages)
-        // Em produção, substitua por seu próprio proxy
-        const PROXY_URL = 'https://corsproxy.io/?';
-        const API_BASE = 'https://api.omni.chat/v1';
-        
-        // Suas credenciais (em produção, use variáveis de ambiente ou backend)
-        const API_CREDENTIALS = {
-            key: 'Xt20s8dek68O6yiqqPepM4cKabltzPmwac0XrIoF',
-            secret: 'r:a97adcc51c38e5950e6e7e0e62816209'
+        // ============================================================================
+        // CONFIGURAÇÃO - CREDENCIAIS EXPOSTAS (TEMPORÁRIO)
+        // ============================================================================
+        const CONFIG = {
+            API_BASE: 'https://api.omni.chat/v1',
+            API_KEY: 'Xt20s8dek68O6yiqqPepM4cKabltzPmwac0XrIoF',
+            API_SECRET: 'r:a97adcc51c38e5950e6e7e0e62816209'
         };
         
-        // Estado da aplicação
-        let isConnected = false;
-        let lastUpdate = null;
-        
-        // ============================================
+        // ============================================================================
         // FUNÇÕES PRINCIPAIS
-        // ============================================
+        // ============================================================================
         
-        // Função para conectar à API
-        async function connectToAPI() {
-            const connectBtn = document.getElementById('connectBtn');
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
+        async function loadAllData() {
+            // Reset interface
+            hideError();
+            updateStatus('Conectando à API...', 'loading');
+            disableButton(true, 'Conectando...');
             
-            // Atualizar UI
-            connectBtn.disabled = true;
-            connectBtn.innerHTML = '🔄 Conectando...';
-            statusDot.className = 'status-dot';
-            statusText.textContent = 'Conectando à API...';
+            // Reset displays
+            showLoading('agents', true);
+            showLoading('chats', true);
+            hideTable('agents');
+            hideTable('chats');
+            hideEmpty('agents');
+            hideEmpty('chats');
+            
+            // Reset KPIs
+            resetKPIs();
             
             try {
-                // Testar conexão com um endpoint simples
-                const testUrl = `${PROXY_URL}${encodeURIComponent(`${API_BASE}/users?limit=1`)}`;
-                
-                const response = await fetch(testUrl, {
-                    method: 'GET',
-                    headers: {
-                        'x-api-key': API_CREDENTIALS.key,
-                        'x-api-secret': API_CREDENTIALS.secret,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    // Conexão bem sucedida
-                    isConnected = true;
-                    statusDot.className = 'status-dot online';
-                    statusText.textContent = '✅ Conectado à API OmniChat';
-                    connectBtn.innerHTML = '🔄 Atualizar Dados';
-                    connectBtn.disabled = false;
-                    connectBtn.onclick = loadDashboardData;
-                    
-                    // Carregar dados
-                    await loadDashboardData();
-                    
-                    // Atualizar a cada 2 minutos
-                    setInterval(loadDashboardData, 120000);
-                    
-                } else {
-                    throw new Error(`API retornou status ${response.status}`);
-                }
-                
-            } catch (error) {
-                console.error('Erro na conexão:', error);
-                
-                // Atualizar UI com erro
-                statusDot.className = 'status-dot offline';
-                statusText.textContent = '❌ Falha na conexão. Verifique as credenciais.';
-                connectBtn.innerHTML = '🔌 Tentar Novamente';
-                connectBtn.disabled = false;
-                
-                // Mostrar alerta
-                showAlert('Erro ao conectar à API. Verifique se as credenciais estão corretas e se o proxy está acessível.', 'warning');
-            }
-        }
-        
-        // Carregar todos os dados do dashboard
-        async function loadDashboardData() {
-            if (!isConnected) return;
-            
-            const connectBtn = document.getElementById('connectBtn');
-            connectBtn.disabled = true;
-            connectBtn.innerHTML = '🔄 Atualizando...';
-            
-            try {
-                // Carregar dados em paralelo
+                // Buscar dados em paralelo
                 const [agentsData, chatsData] = await Promise.all([
-                    fetchData('/users?limit=50'),
-                    fetchData('/chats?limit=20&order.createdAt=DESC')
+                    fetchAPI('/users?limit=50'),
+                    fetchAPI('/chats?limit=30&order.createdAt=DESC')
                 ]);
                 
-                // Processar e exibir dados
-                updateKPIs(agentsData, chatsData);
-                updateAgentsTable(agentsData);
-                updateChatsTable(chatsData);
+                // Processar dados
+                processAgents(agentsData);
+                processChats(chatsData);
                 
-                // Atualizar timestamp
-                lastUpdate = new Date();
-                document.getElementById('statusText').textContent = 
-                    `✅ Atualizado em ${lastUpdate.toLocaleTimeString('pt-BR')}`;
+                // Atualizar KPIs
+                updateKPIs(agentsData, chatsData);
+                
+                updateStatus('✅ Dados carregados', 'connected');
+                updateTime();
+                
+                // Salvar para debug
+                window.lastAPIData = { agents: agentsData, chats: chatsData };
                 
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                showAlert('Erro ao carregar dados da API', 'warning');
+                // ERRO DETALHADO
+                console.error('Erro completo:', error);
+                showError(
+                    `Falha na comunicação com a API: ${error.message}`,
+                    `URL: ${CONFIG.API_BASE}\n` +
+                    `Status: ${error.status || 'N/A'}\n` +
+                    `Hora: ${new Date().toLocaleTimeString()}\n` +
+                    `Stack: ${error.stack ? error.stack.substring(0, 200) + '...' : 'N/A'}`
+                );
+                updateStatus('❌ Erro na API', 'error');
             } finally {
-                connectBtn.disabled = false;
-                connectBtn.innerHTML = '🔄 Atualizar Dados';
+                disableButton(false, '🔄 Atualizar Dados');
             }
         }
         
-        // Função genérica para buscar dados
-        async function fetchData(endpoint) {
-            const url = `${PROXY_URL}${encodeURIComponent(`${API_BASE}${endpoint}`)}`;
+        async function fetchAPI(endpoint) {
+            const url = CONFIG.API_BASE + endpoint;
             
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
-                    'x-api-key': API_CREDENTIALS.key,
-                    'x-api-secret': API_CREDENTIALS.secret,
+                    'x-api-key': CONFIG.API_KEY,
+                    'x-api-secret': CONFIG.API_SECRET,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
             
             if (!response.ok) {
-                throw new Error(`Erro ${response.status} em ${endpoint}`);
+                const error = new Error(`API retornou status ${response.status}`);
+                error.status = response.status;
+                error.response = response;
+                throw error;
             }
             
             return await response.json();
         }
         
-        // ============================================
-        // ATUALIZAÇÃO DA UI
-        // ============================================
+        // ============================================================================
+        // PROCESSAMENTO DE DADOS
+        // ============================================================================
         
-        // Atualizar KPIs
-        function updateKPIs(agentsData, chatsData) {
-            // Total de atendentes
-            const totalAgents = agentsData.results ? agentsData.results.length : 0;
-            document.getElementById('totalAgents').textContent = totalAgents;
-            
-            // Total de conversas
-            const totalChats = chatsData.results ? chatsData.results.length : 0;
-            document.getElementById('totalChats').textContent = totalChats;
-            
-            // Estimar satisfação (exemplo simplificado)
-            const satisfaction = Math.min(95, 70 + Math.floor(Math.random() * 30));
-            document.getElementById('satisfaction').textContent = `${satisfaction}%`;
-            
-            // Tempo médio de resposta (exemplo)
-            const avgTime = Math.floor(Math.random() * 120) + 30;
-            document.getElementById('avgResponse').textContent = `${avgTime}s`;
-        }
-        
-        // Atualizar tabela de atendentes
-        function updateAgentsTable(data) {
-            const loading = document.getElementById('agentsLoading');
-            const table = document.getElementById('agentsTable');
+        function processAgents(data) {
             const tbody = document.getElementById('agentsTableBody');
+            tbody.innerHTML = '';
             
-            if (!data.results || data.results.length === 0) {
-                loading.innerHTML = '<p>❌ Nenhum atendente encontrado</p>';
+            // Verificar estrutura da resposta
+            const agents = data.results || data.data || [];
+            
+            if (!Array.isArray(agents) || agents.length === 0) {
+                document.getElementById('emptyAgents').style.display = 'block';
+                showLoading('agents', false);
                 return;
             }
             
-            // Limpar tabela
-            tbody.innerHTML = '';
-            
-            // Preencher com dados
-            data.results.forEach(agent => {
+            // Preencher tabela
+            agents.forEach(agent => {
                 const row = document.createElement('tr');
                 
-                // Determinar status
-                const isActive = !agent.disabled;
-                const statusClass = isActive ? 'badge-success' : 'badge-danger';
-                const statusText = isActive ? 'Ativo' : 'Inativo';
+                // Status real
+                const isActive = agent.disabled === false || agent.status === 'online';
+                const statusBadge = isActive ? 
+                    '<span class="badge badge-success">Ativo</span>' : 
+                    '<span class="badge badge-danger">Inativo</span>';
                 
-                // Formatar data
-                const lastActivity = agent.updatedAt ? 
-                    new Date(agent.updatedAt).toLocaleDateString('pt-BR') : 
-                    '--';
+                // Data formatada
+                const created = agent.createdAt ? 
+                    new Date(agent.createdAt).toLocaleDateString('pt-BR') : '--';
                 
                 row.innerHTML = `
-                    <td>
-                        <strong>${agent.name || 'Sem nome'}</strong>
-                        ${agent.email ? `<br><small>${agent.email}</small>` : ''}
-                    </td>
-                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td><strong>${agent.name || 'Sem nome'}</strong></td>
+                    <td>${statusBadge}</td>
                     <td>${agent.email || '--'}</td>
-                    <td>${lastActivity}</td>
-                    <td>
-                        <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9rem;" 
-                                onclick="viewAgentDetails('${agent.objectId}')">
-                            👁️ Ver
-                        </button>
-                    </td>
+                    <td>${created}</td>
                 `;
                 
                 tbody.appendChild(row);
             });
             
-            // Mostrar tabela
-            loading.style.display = 'none';
-            table.style.display = 'table';
+            showLoading('agents', false);
+            document.getElementById('agentsTable').style.display = 'table';
         }
         
-        // Atualizar tabela de conversas
-        function updateChatsTable(data) {
-            const loading = document.getElementById('chatsLoading');
-            const table = document.getElementById('chatsTable');
+        function processChats(data) {
             const tbody = document.getElementById('chatsTableBody');
+            tbody.innerHTML = '';
             
-            if (!data.results || data.results.length === 0) {
-                loading.innerHTML = '<p>❌ Nenhuma conversa encontrada</p>';
+            const chats = data.results || data.data || [];
+            
+            if (!Array.isArray(chats) || chats.length === 0) {
+                document.getElementById('emptyChats').style.display = 'block';
+                showLoading('chats', false);
                 return;
             }
             
-            // Limpar tabela
-            tbody.innerHTML = '';
-            
-            // Preencher com dados
-            data.results.forEach(chat => {
+            // Preencher tabela
+            chats.slice(0, 20).forEach(chat => {
                 const row = document.createElement('tr');
                 
-                // Status da conversa
-                let statusClass = 'badge-warning';
-                let statusText = chat.status || 'Ativa';
-                
+                // Status real
+                let statusBadge = '<span class="badge badge-warning">Ativa</span>';
                 if (chat.status === 'FINISHED') {
-                    statusClass = 'badge-success';
-                    statusText = 'Finalizada';
+                    statusBadge = '<span class="badge badge-danger">Finalizada</span>';
                 } else if (chat.status === 'UNASSIGNED') {
-                    statusClass = 'badge-danger';
-                    statusText = 'Não Atribuída';
+                    statusBadge = '<span class="badge badge-warning">Não Atribuída</span>';
                 }
                 
                 // Última mensagem
-                const lastMessage = chat.lastMessage ? 
-                    (chat.lastMessage.text || 'Anexo/Mídia').substring(0, 40) + '...' : 
-                    '--';
+                const lastMsg = chat.lastMessage ? 
+                    (chat.lastMessage.text || 'Anexo/Mídia').substring(0, 50) + '...' : '--';
+                
+                // Data
+                const created = chat.createdAt ? 
+                    new Date(chat.createdAt).toLocaleDateString('pt-BR') : '--';
                 
                 row.innerHTML = `
-                    <td>
-                        <strong>${chat.name || chat.phone || 'Cliente'}</strong>
-                        ${chat.email ? `<br><small>${chat.email}</small>` : ''}
-                    </td>
+                    <td>${chat.name || chat.phone || 'Cliente'}</td>
                     <td>${chat.platform || '--'}</td>
-                    <td><span class="badge ${statusClass}">${statusText}</span></td>
-                    <td title="${lastMessage}">${lastMessage}</td>
-                    <td>${chat.salesPerson ? chat.salesPerson.name : '--'}</td>
+                    <td>${statusBadge}</td>
+                    <td title="${lastMsg}">${lastMsg}</td>
+                    <td>${created}</td>
                 `;
                 
                 tbody.appendChild(row);
             });
             
-            // Mostrar tabela
-            loading.style.display = 'none';
-            table.style.display = 'table';
+            showLoading('chats', false);
+            document.getElementById('chatsTable').style.display = 'table';
         }
         
-        // ============================================
-        // FUNÇÕES AUXILIARES
-        // ============================================
-        
-        // Mostrar alerta
-        function showAlert(message, type = 'info') {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.innerHTML = `
-                <strong>${type === 'warning' ? '⚠️' : 'ℹ️'}</strong> 
-                ${message}
-                <button onclick="this.parentElement.remove()" 
-                        style="float: right; background: none; border: none; font-size: 1.2rem; cursor: pointer;">
-                    ×
-                </button>
-            `;
+        function updateKPIs(agentsData, chatsData) {
+            const agents = agentsData.results || agentsData.data || [];
+            const chats = chatsData.results || chatsData.data || [];
             
-            document.querySelector('.content').insertBefore(alertDiv, document.querySelector('.status-bar'));
+            // Atendentes
+            document.getElementById('kpiAgents').textContent = agents.length;
             
-            // Remover após 5 segundos
-            setTimeout(() => {
-                if (alertDiv.parentElement) {
-                    alertDiv.remove();
-                }
-            }, 5000);
+            // Atendentes ativos
+            const activeAgents = agents.filter(a => 
+                a.disabled === false || a.status === 'online'
+            ).length;
+            document.getElementById('kpiOnline').textContent = activeAgents;
+            
+            // Conversas
+            document.getElementById('kpiChats').textContent = chats.length;
         }
         
-        // Modal de configuração
-        function showConfig() {
-            document.getElementById('configModal').style.display = 'block';
-        }
+        // ============================================================================
+        // FUNÇÕES DE UI
+        // ============================================================================
         
-        function hideConfig() {
-            document.getElementById('configModal').style.display = 'none';
-        }
-        
-        function usePublicProxy() {
-            showAlert('Usando proxy público. Para produção, configure seu próprio proxy no n8n.', 'info');
-            hideConfig();
-        }
-        
-        // Visualizar detalhes do atendente (exemplo)
-        function viewAgentDetails(agentId) {
-            showAlert(`Visualizando detalhes do atendente ${agentId}. Em um dashboard completo, isso abriria um modal com estatísticas detalhadas.`, 'info');
-        }
-        
-        // ============================================
-        // INICIALIZAÇÃO
-        // ============================================
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // Verificar se estamos no GitHub Pages
-            if (window.location.hostname.includes('github.io')) {
-                showAlert('📱 Dashboard funcionando no GitHub Pages! Para melhor performance, considere configurar seu próprio proxy.', 'info');
+        function updateStatus(text, type) {
+            const bar = document.getElementById('statusBar');
+            const dot = document.getElementById('statusDot');
+            const textElem = document.getElementById('statusText');
+            
+            // Reset classes
+            bar.className = 'status-bar status';
+            dot.className = 'status-dot';
+            
+            // Aplicar tipo
+            if (type === 'connected') {
+                bar.classList.add('connected');
+                dot.classList.add('online');
+            } else if (type === 'error') {
+                bar.classList.add('error');
+                dot.classList.add('offline');
+            } else if (type === 'loading') {
+                bar.classList.add('loading');
+                dot.classList.add('loading');
             }
             
-            // Tentar conectar automaticamente após 1 segundo
-            setTimeout(() => {
-                document.getElementById('connectBtn').click();
-            }, 1000);
+            textElem.textContent = text;
+        }
+        
+        function updateTime() {
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            document.getElementById('kpiUpdated').textContent = timeStr;
+        }
+        
+        function resetKPIs() {
+            document.getElementById('kpiAgents').textContent = '0';
+            document.getElementById('kpiChats').textContent = '0';
+            document.getElementById('kpiOnline').textContent = '0';
+            document.getElementById('kpiUpdated').textContent = '--:--';
+        }
+        
+        function showError(message, details = '') {
+            const box = document.getElementById('errorBox');
+            const msg = document.getElementById('errorMessage');
+            const det = document.getElementById('errorDetails');
+            
+            msg.textContent = message;
+            
+            if (details) {
+                det.textContent = details;
+                det.style.display = 'block';
+            }
+            
+            box.style.display = 'block';
+        }
+        
+        function hideError() {
+            document.getElementById('errorBox').style.display = 'none';
+        }
+        
+        function disableButton(disabled, text) {
+            const btn = document.getElementById('loadBtn');
+            btn.disabled = disabled;
+            btn.innerHTML = text;
+        }
+        
+        function showLoading(type, show) {
+            const elem = document.getElementById(`loading${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            elem.style.display = show ? 'block' : 'none';
+        }
+        
+        function hideTable(type) {
+            document.getElementById(`${type}Table`).style.display = 'none';
+        }
+        
+        function hideEmpty(type) {
+            document.getElementById(`empty${type.charAt(0).toUpperCase() + type.slice(1)}`).style.display = 'none';
+        }
+        
+        function toggleRawData() {
+            const rawData = document.getElementById('rawData');
+            const isVisible = rawData.style.display === 'block';
+            rawData.style.display = isVisible ? 'none' : 'block';
+            
+            if (!isVisible && window.lastAPIData) {
+                document.getElementById('rawDataContent').textContent = 
+                    JSON.stringify(window.lastAPIData, null, 2);
+            }
+        }
+        
+        // ============================================================================
+        // INICIALIZAÇÃO
+        // ============================================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            
+            // Aviso no console
+            console.warn('⚠️ Dashboard OmniChat - Credenciais visíveis publicamente');
+            console.log('Configure um backend seguro para produção');
         });
-        
-        // ============================================
-        // PARA DEPLOY NO GITHUB PAGES:
-        // ============================================
-        /*
-        1. Crie um repositório no GitHub
-        2. Faça upload deste arquivo como 'index.html'
-        3. Vá em Settings > Pages > Source: selecione 'main' branch
-        4. Acesse: https://seuusuario.github.io/seurepositorio/
-        
-        PARA DEIXAR PRIVADO E DEPOIS PÚBLICO:
-        1. Inicie com repositório privado
-        2. Teste tudo localmente primeiro
-        3. Quando pronto, torne público
-        4. Para esconder histórico de commits:
-           - Crie um novo repositório público
-           - Copie apenas os arquivos finais
-           - Faça o primeiro commit como "Initial commit"
-        */
     </script>
 </body>
 </html>
