@@ -48,15 +48,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Dashboard OmniChat (via n8n)</h1>
-            <p>Interface segura. As credenciais ficam protegidas no seu servidor n8n.</p>
-            <!-- ⚠️ AVISO DE CONFIGURAÇÃO -->
-            <div class="config-warning">
-                <strong>⚠️ ANTES DE USAR:</strong> Configure as variáveis abaixo com as URLs dos webhooks que você criará no n8n. Use o console do navegador (F12) para definir:<br>
-                <code>window.N8N_WEBHOOK_URL = 'https://api.muvecom.com.br;</code><br>
-                <code>window.WEBHOOK_PATH_AGENTS = '/v1/omnichat-agents';</code><br>
-                <code>window.WEBHOOK_PATH_CHATS = '/v1/omnichat-chats';</code>
-            </div>
+            <h1>📊 Dashboard OmniChat</h1>
+            <p>Dados detalhados dos atendimentos, utilizando o poder da IA para gerar insights.</p>
 
             <div class="status-bar">
                 <div class="status-dot offline" id="statusDot"></div>
@@ -112,11 +105,11 @@
         // ============================================================================
         // 1. CONFIGURAÇÃO - DEFINA AS URLs DOS SEUS WEBHOOKS DO N8N AQUI
         // ============================================================================
-        // ⚠️ SUBSTITUA 'seu-dominio' pelo domínio real do seu n8n Cloud ou servidor.
+        // ⚠️ SUBSTITUA pelo domínio real do seu n8n Cloud ou servidor.
         // No console do navegador, defina:
-        // window.N8N_WEBHOOK_URL = 'https://meu-n8n.app.n8n.cloud';
-        // window.WEBHOOK_PATH_AGENTS = '/webhook/omnichat-agents';
-        // window.WEBHOOK_PATH_CHATS = '/webhook/omnichat-chats';
+        window.N8N_WEBHOOK_URL = 'https://api.muvecom.com.br';
+        window.WEBHOOK_PATH_AGENTS = '/webhook/omnichat-agents';
+        window.WEBHOOK_PATH_CHATS = '/webhook/omnichat-chats';
         const CONFIG = {
             // URL base do seu n8n (Cloud ou self-hosted)
             N8N_BASE_URL: window.N8N_WEBHOOK_URL || '', // Ex: 'https://xyz.app.n8n.cloud'
