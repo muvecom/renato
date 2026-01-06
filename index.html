@@ -280,15 +280,26 @@
         }
 
         // ============================================================================
-        // 5. INICIALIZAÇÃO
+        // 5. INICIALIZAÇÃO E CARREGAMENTO AUTOMÁTICO
         // ============================================================================
         document.addEventListener('DOMContentLoaded', function() {
             updateTime();
-            // Verifica se configurou
+            // Atualiza o status baseado na configuração
             if (!CONFIG.N8N_BASE_URL) {
                 updateStatus('⚠️ Configure as URLs do n8n', 'offline');
+                // Mesmo sem config, tenta carregar após um curto delay para debug
+                setTimeout(() => {
+                    console.log("Configuração N8N_BASE_URL:", CONFIG.N8N_BASE_URL);
+                    console.log("URL completa Agents:", CONFIG.N8N_BASE_URL + CONFIG.WEBHOOKS.AGENTS);
+                }, 1000);
+            } else {
+                updateStatus('🔄 Carregando dados...', 'loading');
+                // CARREGA OS DADOS AUTOMATICAMENTE APÓS 1 SEGUNDO (pode ajustar o tempo)
+                setTimeout(loadAllData, 1000);
             }
         });
+        // Chama a função também diretamente para garantir (fallback)
+        window.onload = loadAllData;
     </script>
 </body>
 </html>
