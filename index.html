@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard OmniChat (via n8n)</title>
+    <title>Dashboard OmniChat</title>
     <style>
         :root { --primary: #2563eb; --danger: #dc2626; --success: #16a34a; --warning: #d97706; --gray: #6b7280; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f9fafb; padding: 20px; color: #111827; }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
         .header { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border-left: 6px solid var(--primary); }
         .header h1 { color: var(--primary); margin-bottom: 10px; }
         .config-warning { background: #fef3c7; border: 1px solid var(--warning); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; }
@@ -32,28 +32,38 @@
         .kpi-label { color: var(--gray); font-size: 14px; }
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-top: 15px; }
         th { background: #f9fafb; text-align: left; padding: 16px; border-bottom: 2px solid #e5e7eb; }
-        td { padding: 16px; border-bottom: 1px solid #f3f4f6; }
+        td { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; }
         .badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
         .badge-success { background: #dcfce7; color: #166534; }
         .badge-warning { background: #fef3c7; color: #92400e; }
         .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #e0f2fe; color: #0c4a6e; }
         .loading { text-align: center; padding: 50px 20px; color: var(--gray); }
         .loading-spinner { width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .empty { text-align: center; padding: 40px 20px; color: var(--gray); font-style: italic; }
         .section { margin: 30px 0; }
         .raw-data { background: #f8fafc; padding: 20px; border-radius: 10px; margin-top: 30px; font-family: monospace; font-size: 13px; max-height: 300px; overflow-y: auto; display: none; }
+        .team-name { background: #f0f9ff; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .last-message { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .platform-badge { background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+        .agent-name { font-weight: 600; }
+        .customer-name { font-weight: 600; margin-bottom: 4px; }
+        .customer-phone { font-size: 12px; color: var(--gray); }
+        .chat-row:hover { background-color: #f8fafc; }
+        .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-select { padding: 8px 12px; border-radius: 6px; border: 1px solid #d1d5db; background: white; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>📊 Dashboard OmniChat</h1>
-            <p>Dados detalhados dos atendimentos, utilizando o poder da IA para gerar insights.</p>
+            <p>Monitoramento de conversas em tempo real - Formato API OmniChat</p>
 
             <div class="status-bar">
                 <div class="status-dot offline" id="statusDot"></div>
-                <span id="statusText">Configure as URLs acima e clique para carregar</span>
+                <span id="statusText">Aguardando configuração</span>
             </div>
         </div>
 
@@ -63,8 +73,8 @@
         </div>
 
         <div class="controls">
-            <button class="btn-primary" onclick="loadAllData()" id="loadBtn">
-                🔄 Carregar Dados via n8n
+            <button class="btn-primary" onclick="loadOmnichatData()" id="loadBtn">
+                🔄 Carregar Dados OmniChat
             </button>
             <button class="btn-secondary" onclick="toggleRawData()">
                 📄 Ver Dados Brutos
@@ -72,178 +82,564 @@
         </div>
 
         <div class="grid">
-            <div class="kpi-card"><div class="kpi-value" id="kpiAgents">0</div><div class="kpi-label">Atendentes</div></div>
-            <div class="kpi-card"><div class="kpi-value" id="kpiChats">0</div><div class="kpi-label">Conversas</div></div>
-            <div class="kpi-card"><div class="kpi-value" id="kpiOnline">0</div><div class="kpi-label">Ativos</div></div>
+            <div class="kpi-card"><div class="kpi-value" id="kpiTotalChats">0</div><div class="kpi-label">Total Conversas</div></div>
+            <div class="kpi-card"><div class="kpi-value" id="kpiActiveChats">0</div><div class="kpi-label">Ativas Agora</div></div>
+            <div class="kpi-card"><div class="kpi-value" id="kpiWaiting">0</div><div class="kpi-label">Aguardando</div></div>
+            <div class="kpi-card"><div class="kpi-value" id="kpiAgents">0</div><div class="kpi-label">Agentes Ativos</div></div>
             <div class="kpi-card"><div class="kpi-value" id="kpiUpdated">--:--</div><div class="kpi-label">Atualizado</div></div>
         </div>
 
         <div class="section">
-            <h2>👥 Atendentes</h2>
-            <div class="loading" id="loadingAgents"><div class="loading-spinner"></div><p>Buscando...</p></div>
-            <div id="emptyAgents" class="empty" style="display:none;">Nenhum atendente</div>
+            <h2>👥 Agentes/Usuários</h2>
+            <div class="loading" id="loadingAgents"><div class="loading-spinner"></div><p>Buscando agentes...</p></div>
+            <div id="emptyAgents" class="empty" style="display:none;">Nenhum agente encontrado</div>
             <table id="agentsTable" style="display:none;">
-                <thead><tr><th>Nome</th><th>Status</th><th>Email</th><th>Criado em</th></tr></thead>
+                <thead><tr><th>Nome</th><th>Tipo</th><th>Status</th><th>Email</th><th>Criado em</th></tr></thead>
                 <tbody id="agentsTableBody"></tbody>
             </table>
         </div>
 
         <div class="section">
-            <h2>💬 Conversas Recentes</h2>
-            <div class="loading" id="loadingChats"><div class="loading-spinner"></div><p>Buscando...</p></div>
-            <div id="emptyChats" class="empty" style="display:none;">Nenhuma conversa</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">💬 Conversas Recentes</h2>
+                <div class="filters">
+                    <select class="filter-select" id="filterStatus" onchange="filterChats()">
+                        <option value="all">Todos os status</option>
+                        <option value="USER">Em Atendimento</option>
+                        <option value="TEAM">Na Equipe</option>
+                        <option value="FINISHED">Finalizadas</option>
+                        <option value="WAITING">Aguardando</option>
+                    </select>
+                    <select class="filter-select" id="filterPlatform" onchange="filterChats()">
+                        <option value="all">Todas plataformas</option>
+                        <option value="WAB-OMNICHAT">WhatsApp</option>
+                        <option value="INSTAGRAM">Instagram</option>
+                        <option value="FACEBOOK">Facebook</option>
+                    </select>
+                </div>
+            </div>
+            <div class="loading" id="loadingChats"><div class="loading-spinner"></div><p>Buscando conversas...</p></div>
+            <div id="emptyChats" class="empty" style="display:none;">Nenhuma conversa encontrada</div>
             <table id="chatsTable" style="display:none;">
-                <thead><tr><th>Cliente</th><th>Plataforma</th><th>Status</th><th>Última Mensagem</th><th>Criada</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Plataforma/Origem</th>
+                        <th>Status/Equipe</th>
+                        <th>Agente</th>
+                        <th>Última Mensagem</th>
+                        <th>Iniciada</th>
+                    </tr>
+                </thead>
                 <tbody id="chatsTableBody"></tbody>
             </table>
         </div>
 
-        <div class="raw-data" id="rawData"><strong>Dados Recebidos:</strong><pre id="rawDataContent"></pre></div>
+        <div class="raw-data" id="rawData">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <strong>📋 Dados Recebidos da API OmniChat</strong>
+                <button onclick="copyRawData()" style="padding: 5px 10px; font-size: 12px;">📋 Copiar</button>
+            </div>
+            <pre id="rawDataContent">Aguardando dados...</pre>
+        </div>
     </div>
 
     <script>
         // ============================================================================
-        // 1. CONFIGURAÇÃO - DEFINA AS URLs DOS SEUS WEBHOOKS DO N8N AQUI
+        // CONFIGURAÇÃO - AJUSTE AQUI SUAS URLs
         // ============================================================================
-        // ⚠️ SUBSTITUA pelo domínio real do seu n8n Cloud ou servidor.
-        // No console do navegador, defina:
-        window.N8N_WEBHOOK_URL = 'https://api.muvecom.com.br';
-        window.WEBHOOK_PATH_AGENTS = '/v1/omnichat-agents';
-        window.WEBHOOK_PATH_CHATS = '/v1/omnichat-chats';
         const CONFIG = {
-            // URL base do seu n8n (Cloud ou self-hosted)
-            N8N_BASE_URL: window.N8N_WEBHOOK_URL || '', // Ex: 'https://xyz.app.n8n.cloud'
-            // Caminhos dos webhooks que você criará
-            WEBHOOKS: {
-                AGENTS: window.WEBHOOK_PATH_AGENTS || '', // Ex: '/webhook/omnichat-agents'
-                CHATS: window.WEBHOOK_PATH_CHATS || ''    // Ex: '/webhook/omnichat-chats'
-            }
+            // URL do seu backend que consome a API OmniChat
+            OMNICHAT_API_URL: 'https://api.muvecom.com.br/v1/omnichat-chats',
+            // Caso tenha endpoint específico para agentes (opcional)
+            AGENTS_API_URL: 'https://api.muvecom.com.br/v1/omnichat-agents'
         };
+
+        // Variáveis globais
         let lastData = null;
+        let allChats = [];
+        let allAgents = [];
 
         // ============================================================================
-        // 2. FUNÇÃO PRINCIPAL - BUSCA DADOS DOS WEBHOOKS
+        // FUNÇÃO PRINCIPAL - CARREGA DADOS DO OMNICHAT
         // ============================================================================
-        async function loadAllData() {
-            // Valida configuração
-            if (!CONFIG.N8N_BASE_URL || !CONFIG.WEBHOOKS.AGENTS) {
-                showError('Configure primeiro as URLs do n8n. Veja o aviso amarelo no topo da página.', '');
-                return;
-            }
-            // Reset UI
-            hideError();
-            updateStatus('Conectando ao n8n...', 'loading');
-            document.getElementById('loadBtn').disabled = true;
-            document.getElementById('loadBtn').innerHTML = '🔄 Buscando...';
-            showLoading('agents', true); showLoading('chats', true);
-            hideTable('agents'); hideTable('chats'); hideEmpty('agents'); hideEmpty('chats');
-            resetKPIs();
-
+        async function loadOmnichatData() {
             try {
-                // Busca em paralelo
-                const [agentsData, chatsData] = await Promise.all([
-                    fetchFromN8N(CONFIG.WEBHOOKS.AGENTS),
-                    fetchFromN8N(CONFIG.WEBHOOKS.CHATS)
-                ]);
-                // Processa respostas
-                processAgents(agentsData);
-                processChats(chatsData);
-                updateKPIs(agentsData, chatsData);
-                updateStatus('✅ Dados carregados via n8n', 'online');
+                // Reset UI
+                hideError();
+                updateStatus('Conectando à API OmniChat...', 'loading');
+                document.getElementById('loadBtn').disabled = true;
+                document.getElementById('loadBtn').innerHTML = '🔄 Buscando...';
+                showLoading('agents', true);
+                showLoading('chats', true);
+                hideTable('agents');
+                hideTable('chats');
+                hideEmpty('agents');
+                hideEmpty('chats');
+                resetKPIs();
+
+                // Tenta buscar de ambos endpoints, mas se um falhar, usa o principal
+                let chatsData = null;
+                let agentsData = null;
+
+                try {
+                    // Primeiro tenta o endpoint principal
+                    chatsData = await fetchFromAPI(CONFIG.OMNICHAT_API_URL);
+                } catch (error) {
+                    console.warn('Erro no endpoint principal:', error);
+                    throw new Error(`Falha ao conectar com a API OmniChat: ${error.message}`);
+                }
+
+                try {
+                    // Tenta o endpoint de agentes (se configurado e se não for o mesmo URL)
+                    if (CONFIG.AGENTS_API_URL && CONFIG.AGENTS_API_URL !== CONFIG.OMNICHAT_API_URL) {
+                        agentsData = await fetchFromAPI(CONFIG.AGENTS_API_URL);
+                    }
+                } catch (error) {
+                    console.warn('Endpoint de agentes falhou, usando dados das conversas:', error);
+                    agentsData = chatsData; // Usa os mesmos dados
+                }
+
+                // Processa os dados
+                processAllData(chatsData, agentsData);
+                
+                updateStatus('✅ Dados carregados com sucesso', 'online');
                 updateTime();
+                
                 // Guarda para debug
-                lastData = { agents: agentsData, chats: chatsData, time: new Date().toISOString() };
+                lastData = {
+                    chats: chatsData,
+                    agents: agentsData,
+                    timestamp: new Date().toISOString(),
+                    totalChats: chatsData.length || 0
+                };
+                
             } catch (error) {
-                console.error('Erro:', error);
-                showError(`Falha ao buscar dados: ${error.message}`, error.stack);
-                updateStatus('❌ Erro no servidor n8n', 'offline');
+                console.error('Erro ao carregar dados:', error);
+                showError(`Falha ao carregar dados: ${error.message}`, error.stack);
+                updateStatus('❌ Erro na conexão', 'offline');
             } finally {
                 document.getElementById('loadBtn').disabled = false;
-                document.getElementById('loadBtn').innerHTML = '🔄 Carregar Dados via n8n';
+                document.getElementById('loadBtn').innerHTML = '🔄 Carregar Dados OmniChat';
             }
         }
 
-        async function fetchFromN8N(webhookPath) {
-            const url = CONFIG.N8N_BASE_URL + webhookPath;
+        async function fetchFromAPI(url) {
+            console.log('Fetching from:', url);
             const response = await fetch(url, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                mode: 'cors'
             });
+            
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`n8n (${response.status}): ${errorText.substring(0, 100)}`);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            return await response.json();
+            
+            const data = await response.json();
+            
+            // Verifica se é array (formato OmniChat) ou se tem propriedade data
+            if (Array.isArray(data)) {
+                return data; // Formato direto da API
+            } else if (data.data && Array.isArray(data.data)) {
+                return data.data; // Formato envelopado
+            } else if (data.results && Array.isArray(data.results)) {
+                return data.results; // Outro formato possível
+            } else {
+                console.warn('Formato de dados inesperado:', data);
+                return []; // Retorna array vazio para não quebrar
+            }
         }
 
         // ============================================================================
-        // 3. PROCESSAMENTO DOS DADOS RECEBIDOS DO N8N
+        // PROCESSAMENTO DOS DADOS OMNICHAT
         // ============================================================================
-        function processAgents(data) {
+        function processAllData(chatsData, agentsData) {
+            // Garante que temos arrays
+            const chats = Array.isArray(chatsData) ? chatsData : [];
+            const agentsInput = Array.isArray(agentsData) ? agentsData : chats; // Fallback
+            
+            // Armazena dados globais
+            allChats = chats;
+            
+            // Extrai agentes dos dados
+            allAgents = extractAgentsFromData(chats, agentsInput);
+            
+            // Atualiza KPIs
+            updateKPIs(chats, allAgents);
+            
+            // Renderiza tabelas
+            renderAgentsTable(allAgents);
+            renderChatsTable(chats);
+        }
+
+        function extractAgentsFromData(chats, agentsInput) {
+            const agentsMap = new Map();
+            
+            // 1. Extrai dos usuários nas conversas
+            chats.forEach(chat => {
+                if (chat.user && chat.user.objectId) {
+                    const agentId = chat.user.objectId;
+                    if (!agentsMap.has(agentId)) {
+                        agentsMap.set(agentId, {
+                            id: agentId,
+                            name: chat.user.name || 'Sem nome',
+                            lastName: chat.user.lastName || '',
+                            email: chat.user.email || '--',
+                            picture: chat.user.picture,
+                            type: 'atendente',
+                            status: chat.user.disabled === false ? 'ativo' : 'inativo',
+                            lastActivity: chat.updatedAt,
+                            createdAt: chat.user.createdAt || chat.createdAt
+                        });
+                    }
+                }
+                
+                // 2. Extrai do customerSupportRequest
+                if (chat.customerSupportRequest) {
+                    const csr = chat.customerSupportRequest;
+                    if (csr.contactedBy && csr.contactedBy.objectId) {
+                        const agentId = csr.contactedBy.objectId;
+                        if (!agentsMap.has(agentId)) {
+                            agentsMap.set(agentId, {
+                                id: agentId,
+                                name: csr.contactedBy.name || 'Atendente',
+                                lastName: csr.contactedBy.lastName || '',
+                                email: '--',
+                                type: 'contatado_por',
+                                status: 'ativo',
+                                lastActivity: csr.updatedAt,
+                                createdAt: chat.createdAt
+                            });
+                        }
+                    }
+                    
+                    // 3. Participating Users
+                    if (csr.participatingUsers && Array.isArray(csr.participatingUsers)) {
+                        csr.participatingUsers.forEach(user => {
+                            if (user.objectId && !agentsMap.has(user.objectId)) {
+                                agentsMap.set(user.objectId, {
+                                    id: user.objectId,
+                                    name: user.name || 'Participante',
+                                    lastName: user.lastName || '',
+                                    email: '--',
+                                    type: 'participante',
+                                    status: 'ativo',
+                                    createdAt: chat.createdAt
+                                });
+                            }
+                        });
+                    }
+                }
+                
+                // 4. Equipe
+                if (chat.team && chat.team.users) {
+                    chat.team.users.forEach(user => {
+                        if (user.objectId && !agentsMap.has(user.objectId)) {
+                            agentsMap.set(user.objectId, {
+                                id: user.objectId,
+                                name: user.name || 'Membro da Equipe',
+                                lastName: user.lastName || '',
+                                email: '--',
+                                type: 'equipe',
+                                status: 'ativo',
+                                createdAt: chat.team.createdAt || chat.createdAt
+                            });
+                        }
+                    });
+                }
+            });
+            
+            // 5. Adiciona agentes do endpoint específico (se disponível)
+            if (Array.isArray(agentsInput) && agentsInput !== chats) {
+                agentsInput.forEach(agent => {
+                    if (agent.objectId && !agentsMap.has(agent.objectId)) {
+                        agentsMap.set(agent.objectId, {
+                            id: agent.objectId,
+                            name: agent.name || 'Agente',
+                            lastName: agent.lastName || '',
+                            email: agent.email || '--',
+                            picture: agent.picture,
+                            type: 'agente',
+                            status: agent.disabled === false ? 'ativo' : 'inativo',
+                            createdAt: agent.createdAt
+                        });
+                    }
+                });
+            }
+            
+            return Array.from(agentsMap.values());
+        }
+
+        function renderAgentsTable(agents) {
             const tbody = document.getElementById('agentsTableBody');
             const loading = document.getElementById('loadingAgents');
             const table = document.getElementById('agentsTable');
             const empty = document.getElementById('emptyAgents');
-            tbody.innerHTML = ''; loading.style.display = 'none'; table.style.display = 'none'; empty.style.display = 'none';
-
-            // Supõe que o n8n retorna { success: true, data: [...] } ou array direto
-            const agents = data.data || data.results || data;
-            if (!Array.isArray(agents) || agents.length === 0) {
-                empty.style.display = 'block'; return;
+            
+            tbody.innerHTML = '';
+            loading.style.display = 'none';
+            table.style.display = 'none';
+            empty.style.display = 'none';
+            
+            if (!agents || agents.length === 0) {
+                empty.style.display = 'block';
+                return;
             }
+            
+            // Ordena por nome
+            agents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            
             agents.forEach(agent => {
                 const row = document.createElement('tr');
-                const isActive = agent.disabled === false || agent.status === 'online';
-                const statusBadge = isActive ? '<span class="badge badge-success">Ativo</span>' : '<span class="badge badge-danger">Inativo</span>';
-                const created = agent.createdAt ? new Date(agent.createdAt).toLocaleDateString('pt-BR') : '--';
-                row.innerHTML = `<td><strong>${agent.name || 'Sem nome'}</strong></td>
-                                 <td>${statusBadge}</td>
-                                 <td>${agent.email || '--'}</td>
-                                 <td>${created}</td>`;
+                
+                // Status badge
+                const statusClass = agent.status === 'ativo' ? 'badge-success' : 'badge-danger';
+                const statusText = agent.status === 'ativo' ? 'Ativo' : 'Inativo';
+                
+                // Tipo badge
+                let typeBadge = '';
+                if (agent.type === 'atendente') {
+                    typeBadge = '<span class="badge badge-info">Atendente</span>';
+                } else if (agent.type === 'equipe') {
+                    typeBadge = '<span class="badge" style="background:#f3e8ff;color:#7c3aed;">Equipe</span>';
+                } else {
+                    typeBadge = `<span class="badge" style="background:#f0f9ff;color:#0369a1;">${agent.type}</span>`;
+                }
+                
+                // Data formatada
+                const created = agent.createdAt ? 
+                    new Date(agent.createdAt).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    }) : '--';
+                
+                // Nome completo
+                const fullName = `${agent.name || ''} ${agent.lastName || ''}`.trim() || 'Sem nome';
+                
+                row.innerHTML = `
+                    <td class="agent-name">${fullName}</td>
+                    <td>${typeBadge}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>${agent.email || '--'}</td>
+                    <td>${created}</td>
+                `;
                 tbody.appendChild(row);
             });
+            
             table.style.display = 'table';
         }
 
-        function processChats(data) {
+        function renderChatsTable(chats) {
             const tbody = document.getElementById('chatsTableBody');
             const loading = document.getElementById('loadingChats');
             const table = document.getElementById('chatsTable');
             const empty = document.getElementById('emptyChats');
-            tbody.innerHTML = ''; loading.style.display = 'none'; table.style.display = 'none'; empty.style.display = 'none';
-
-            const chats = data.data || data.results || data;
-            if (!Array.isArray(chats) || chats.length === 0) {
-                empty.style.display = 'block'; return;
+            
+            tbody.innerHTML = '';
+            loading.style.display = 'none';
+            table.style.display = 'none';
+            empty.style.display = 'none';
+            
+            if (!chats || chats.length === 0) {
+                empty.style.display = 'block';
+                return;
             }
-            chats.slice(0, 15).forEach(chat => {
+            
+            // Ordena por data mais recente
+            chats.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+            
+            // Aplica filtros
+            const filteredChats = applyChatFilters(chats);
+            
+            if (filteredChats.length === 0) {
+                empty.style.display = 'block';
+                empty.textContent = 'Nenhuma conversa corresponde aos filtros aplicados';
+                return;
+            }
+            
+            filteredChats.slice(0, 50).forEach(chat => {
                 const row = document.createElement('tr');
-                let statusBadge = '<span class="badge badge-warning">Ativa</span>';
-                if (chat.status === 'FINISHED') statusBadge = '<span class="badge badge-danger">Finalizada</span>';
-                if (chat.status === 'UNASSIGNED') statusBadge = '<span class="badge badge-warning">Não Atribuída</span>';
-                const lastMsg = chat.lastMessage ? (chat.lastMessage.text || 'Anexo').substring(0,50)+'...' : '--';
-                const created = chat.createdAt ? new Date(chat.createdAt).toLocaleDateString('pt-BR') : '--';
-                row.innerHTML = `<td>${chat.name || chat.phone || 'Cliente'}</td>
-                                 <td>${chat.platform || '--'}</td>
-                                 <td>${statusBadge}</td>
-                                 <td title="${lastMsg}">${lastMsg}</td>
-                                 <td>${created}</td>`;
+                row.className = 'chat-row';
+                
+                // Informações do Cliente
+                const customerName = chat.customer ? 
+                    `${chat.customer.name || ''} ${chat.customer.lastName || ''}`.trim() : 
+                    chat.name || 'Cliente';
+                const customerPhone = chat.phone ? 
+                    `+${chat.phone.countryCode || '55'} (${chat.phone.areaCode || ''}) ${formatPhoneNumber(chat.phone.phoneNumber)}` : 
+                    (chat.customer ? `+${chat.customer.phoneCountryCode || '55'} (${chat.customer.phoneAreaCode || ''}) ${formatPhoneNumber(chat.customer.phoneNumber)}` : '--');
+                
+                // Plataforma e Origem
+                const platform = chat.platform || '--';
+                let originInfo = '--';
+                if (chat.customerSupportRequest && chat.customerSupportRequest.origin) {
+                    const origin = chat.customerSupportRequest.origin;
+                    if (origin.type === 'ADS') {
+                        originInfo = `Anúncio: ${origin.name || origin.channel || '--'}`;
+                    } else if (origin.type === 'INBOUND') {
+                        originInfo = 'Entrada Orgânica';
+                    }
+                }
+                
+                // Status e Equipe
+                let statusBadge = '';
+                let teamInfo = '';
+                
+                if (chat.status === 'FINISHED') {
+                    statusBadge = '<span class="badge badge-danger">Finalizada</span>';
+                } else if (chat.status === 'USER') {
+                    statusBadge = '<span class="badge badge-success">Em Atendimento</span>';
+                } else if (chat.status === 'TEAM') {
+                    statusBadge = '<span class="badge badge-warning">Na Equipe</span>';
+                } else {
+                    statusBadge = '<span class="badge" style="background:#f3f4f6;color:#6b7280;">Aguardando</span>';
+                }
+                
+                if (chat.team && chat.team.name) {
+                    teamInfo = `<div class="team-name" title="${chat.team.name}">${truncateText(chat.team.name, 20)}</div>`;
+                } else if (chat.customerSupportRequest && chat.customerSupportRequest.teamId) {
+                    teamInfo = `<div class="team-name">Equipe: ${truncateText(chat.customerSupportRequest.teamId, 10)}</div>`;
+                }
+                
+                // Agente Responsável
+                let agentInfo = '--';
+                if (chat.user && chat.user.name) {
+                    const agentName = `${chat.user.name || ''} ${chat.user.lastName || ''}`.trim();
+                    agentInfo = `<span class="agent-name">${agentName}</span>`;
+                } else if (chat.customerSupportRequest && chat.customerSupportRequest.contactedBy) {
+                    const contactedByName = `${chat.customerSupportRequest.contactedBy.name || ''} ${chat.customerSupportRequest.contactedBy.lastName || ''}`.trim();
+                    agentInfo = `<span>${contactedByName || 'Atendente'}</span>`;
+                }
+                
+                // Última Mensagem
+                let lastMessage = '--';
+                if (chat.lastMessage) {
+                    const msg = chat.lastMessage;
+                    let msgText = '';
+                    if (msg.type === 'TEXT') {
+                        msgText = msg.text || '(sem texto)';
+                    } else if (msg.type === 'ROUTING') {
+                        msgText = `📤 ${msg.text || 'Encaminhamento'}`;
+                    } else if (msg.type === 'GROUPED') {
+                        msgText = '📎 Conteúdo agrupado';
+                    } else {
+                        msgText = `${msg.type || 'Mensagem'}: ${msg.text || ''}`;
+                    }
+                    lastMessage = truncateText(msgText, 60);
+                }
+                
+                // Data de Criação
+                const createdAt = chat.createdAt ? 
+                    new Date(chat.createdAt).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '--';
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="customer-name">${customerName || 'Cliente'}</div>
+                        <div class="customer-phone">${customerPhone}</div>
+                    </td>
+                    <td>
+                        <div class="platform-badge">${platform}</div>
+                        <small style="display:block;margin-top:4px;color:#6b7280;font-size:11px;">${originInfo}</small>
+                    </td>
+                    <td>
+                        ${statusBadge}
+                        ${teamInfo}
+                    </td>
+                    <td>${agentInfo}</td>
+                    <td class="last-message" title="${lastMessage}">${lastMessage}</td>
+                    <td style="white-space:nowrap;">${createdAt}</td>
+                `;
+                
                 tbody.appendChild(row);
             });
+            
             table.style.display = 'table';
         }
 
-        function updateKPIs(agentsData, chatsData) {
-            const agents = agentsData.data || agentsData.results || agentsData || [];
-            const chats = chatsData.data || chatsData.results || chatsData || [];
-            document.getElementById('kpiAgents').textContent = agents.length;
-            document.getElementById('kpiChats').textContent = chats.length;
-            const active = agents.filter(a => a.disabled === false || a.status === 'online').length;
-            document.getElementById('kpiOnline').textContent = active;
+        function applyChatFilters(chats) {
+            const statusFilter = document.getElementById('filterStatus').value;
+            const platformFilter = document.getElementById('filterPlatform').value;
+            
+            return chats.filter(chat => {
+                // Filtro de status
+                if (statusFilter !== 'all') {
+                    if (statusFilter === 'WAITING') {
+                        // Para WAITING, verifica tanto status WAITING quanto customerSupportRequest WAITING
+                        const isWaiting = chat.status === 'TEAM' || 
+                                         (chat.customerSupportRequest && chat.customerSupportRequest.status === 'WAITING');
+                        if (statusFilter === 'WAITING' && !isWaiting) return false;
+                    } else if (chat.status !== statusFilter) {
+                        return false;
+                    }
+                }
+                
+                // Filtro de plataforma
+                if (platformFilter !== 'all' && chat.platform !== platformFilter) {
+                    return false;
+                }
+                
+                return true;
+            });
+        }
+
+        function filterChats() {
+            if (allChats.length > 0) {
+                renderChatsTable(allChats);
+            }
         }
 
         // ============================================================================
-        // 4. FUNÇÕES AUXILIARES DA UI
+        // FUNÇÕES AUXILIARES
+        // ============================================================================
+        function updateKPIs(chats, agents) {
+            // Total de conversas
+            document.getElementById('kpiTotalChats').textContent = chats.length;
+            
+            // Conversas ativas (não finalizadas)
+            const activeChats = chats.filter(chat => 
+                chat.status !== 'FINISHED' && 
+                (!chat.customerSupportRequest || chat.customerSupportRequest.status !== 'FINISHED')
+            ).length;
+            document.getElementById('kpiActiveChats').textContent = activeChats;
+            
+            // Aguardando atendimento
+            const waitingChats = chats.filter(chat => 
+                chat.status === 'TEAM' || 
+                (chat.customerSupportRequest && chat.customerSupportRequest.status === 'WAITING')
+            ).length;
+            document.getElementById('kpiWaiting').textContent = waitingChats;
+            
+            // Agentes ativos (com status ativo)
+            const activeAgents = agents.filter(agent => agent.status === 'ativo').length;
+            document.getElementById('kpiAgents').textContent = activeAgents;
+        }
+
+        function formatPhoneNumber(phone) {
+            if (!phone) return '';
+            const phoneStr = phone.toString();
+            if (phoneStr.length <= 8) return phoneStr;
+            return phoneStr.replace(/(\d{4})(\d{4})/, '$1-$2');
+        }
+
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
+        // ============================================================================
+        // FUNÇÕES DE UI
         // ============================================================================
         function updateStatus(text, type) {
             const dot = document.getElementById('statusDot');
@@ -251,55 +647,99 @@
             dot.className = 'status-dot ' + type;
             textElem.textContent = text;
         }
+
         function updateTime() {
             const now = new Date();
-            document.getElementById('kpiUpdated').textContent = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            document.getElementById('kpiUpdated').textContent = 
+                now.getHours().toString().padStart(2,'0') + ':' + 
+                now.getMinutes().toString().padStart(2,'0');
         }
+
         function resetKPIs() {
+            document.getElementById('kpiTotalChats').textContent = '0';
+            document.getElementById('kpiActiveChats').textContent = '0';
+            document.getElementById('kpiWaiting').textContent = '0';
             document.getElementById('kpiAgents').textContent = '0';
-            document.getElementById('kpiChats').textContent = '0';
-            document.getElementById('kpiOnline').textContent = '0';
             document.getElementById('kpiUpdated').textContent = '--:--';
         }
+
         function showError(msg, details) {
             document.getElementById('errorMessage').textContent = msg;
             const det = document.getElementById('errorDetails');
-            if (details) { det.textContent = details; det.style.display = 'block'; } else { det.style.display = 'none'; }
+            if (details) { 
+                det.textContent = typeof details === 'string' ? details : JSON.stringify(details, null, 2); 
+                det.style.display = 'block'; 
+            } else { 
+                det.style.display = 'none'; 
+            }
             document.getElementById('errorBox').style.display = 'block';
         }
-        function hideError() { document.getElementById('errorBox').style.display = 'none'; }
-        function showLoading(type, show) { document.getElementById(`loading${type.charAt(0).toUpperCase()+type.slice(1)}`).style.display = show ? 'block' : 'none'; }
-        function hideTable(type) { document.getElementById(`${type}Table`).style.display = 'none'; }
-        function hideEmpty(type) { document.getElementById(`empty${type.charAt(0).toUpperCase()+type.slice(1)}`).style.display = 'none'; }
+
+        function hideError() { 
+            document.getElementById('errorBox').style.display = 'none'; 
+        }
+
+        function showLoading(type, show) { 
+            const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
+            const element = document.getElementById(`loading${typeCapitalized}`);
+            if (element) element.style.display = show ? 'block' : 'none'; 
+        }
+
+        function hideTable(type) { 
+            document.getElementById(`${type}Table`).style.display = 'none'; 
+        }
+
+        function hideEmpty(type) { 
+            const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
+            document.getElementById(`empty${typeCapitalized}`).style.display = 'none'; 
+        }
+
         function toggleRawData() {
             const rd = document.getElementById('rawData');
-            rd.style.display = rd.style.display === 'block' ? 'none' : 'block';
-            if (rd.style.display === 'block' && lastData) {
+            const isVisible = rd.style.display === 'block';
+            rd.style.display = isVisible ? 'none' : 'block';
+            
+            if (!isVisible && lastData) {
                 document.getElementById('rawDataContent').textContent = JSON.stringify(lastData, null, 2);
             }
         }
 
+        function copyRawData() {
+            const rawContent = document.getElementById('rawDataContent').textContent;
+            navigator.clipboard.writeText(rawContent).then(() => {
+                alert('Dados copiados para a área de transferência!');
+            });
+        }
+
         // ============================================================================
-        // 5. INICIALIZAÇÃO E CARREGAMENTO AUTOMÁTICO
+        // INICIALIZAÇÃO
         // ============================================================================
         document.addEventListener('DOMContentLoaded', function() {
             updateTime();
-            // Atualiza o status baseado na configuração
-            if (!CONFIG.N8N_BASE_URL) {
-                updateStatus('⚠️ Configure as URLs do n8n', 'offline');
-                // Mesmo sem config, tenta carregar após um curto delay para debug
-                setTimeout(() => {
-                    console.log("Configuração N8N_BASE_URL:", CONFIG.N8N_BASE_URL);
-                    console.log("URL completa Agents:", CONFIG.N8N_BASE_URL + CONFIG.WEBHOOKS.AGENTS);
-                }, 1000);
+            
+            // Verifica se as URLs estão configuradas
+            if (!CONFIG.OMNICHAT_API_URL) {
+                updateStatus('⚠️ Configure a URL da API OmniChat', 'offline');
+                showError('Configure a URL da API OmniChat no início do arquivo JavaScript (CONFIG.OMNICHAT_API_URL)', '');
             } else {
-                updateStatus('🔄 Carregando dados...', 'loading');
-                // CARREGA OS DADOS AUTOMATICAMENTE APÓS 1 SEGUNDO (pode ajustar o tempo)
-                setTimeout(loadAllData, 1000);
+                updateStatus('🔄 Pronto para carregar dados', 'offline');
+                
+                // Carrega dados automaticamente após 1 segundo
+                setTimeout(() => {
+                    loadOmnichatData();
+                }, 1000);
             }
         });
-        // Chama a função também diretamente para garantir (fallback)
-        window.onload = loadAllData;
+
+        // Carrega dados quando a página termina de carregar
+        window.onload = function() {
+            // Adiciona um pequeno delay para garantir que tudo está carregado
+            setTimeout(() => {
+                if (CONFIG.OMNICHAT_API_URL && !document.getElementById('errorBox').style.display) {
+                    loadOmnichatData();
+                }
+            }, 500);
+        };
     </script>
 </body>
 </html>
