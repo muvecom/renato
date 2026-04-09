@@ -1,60 +1,456 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoramento dos vendedores (Omnichat)</title>
     <style>
-        :root { --primary: #2563eb; --danger: #dc2626; --success: #16a34a; --warning: #d97706; --gray: #6b7280; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f9fafb; padding: 20px; color: #111827; }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .header { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; border-left: 6px solid var(--primary); }
-        .header h1 { color: var(--primary); margin-bottom: 10px; }
-        .config-warning { background: #fef3c7; border: 1px solid var(--warning); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; }
-        .config-warning code { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; }
-        .controls { display: flex; gap: 12px; margin-bottom: 25px; }
-        button { padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
-        .btn-secondary { background: #e5e7eb; color: #374151; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .status-bar { display: flex; align-items: center; gap: 10px; padding: 15px; background: #f3f4f6; border-radius: 8px; margin-bottom: 25px; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .status-dot.online { background: var(--success); }
-        .status-dot.offline { background: var(--danger); }
-        .status-dot.loading { background: var(--warning); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
-        .error-box { background: #fee2e2; color: var(--danger); padding: 20px; border-radius: 8px; margin-bottom: 25px; display: none; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 25px 0; }
-        .kpi-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
-        .kpi-value { font-size: 36px; font-weight: 800; margin: 10px 0; color: var(--primary); }
-        .kpi-label { color: var(--gray); font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-top: 15px; }
-        th { background: #f9fafb; text-align: left; padding: 16px; border-bottom: 2px solid #e5e7eb; }
-        td { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; }
-        .badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
-        .badge-success { background: #dcfce7; color: #166534; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
-        .badge-danger { background: #fee2e2; color: #991b1b; }
-        .badge-info { background: #e0f2fe; color: #0c4a6e; }
-        .loading { text-align: center; padding: 50px 20px; color: var(--gray); }
-        .loading-spinner { width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .empty { text-align: center; padding: 40px 20px; color: var(--gray); font-style: italic; }
-        .section { margin: 30px 0; }
-        .raw-data { background: #f8fafc; padding: 20px; border-radius: 10px; margin-top: 30px; font-family: monospace; font-size: 13px; max-height: 300px; overflow-y: auto; display: none; }
-        .team-name { background: #f0f9ff; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-        .last-message { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .platform-badge { background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
-        .agent-name { font-weight: 600; }
-        .customer-name { font-weight: 600; margin-bottom: 4px; }
-        .customer-phone { font-size: 12px; color: var(--gray); }
-        .chat-row:hover { background-color: #f8fafc; }
-        .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .filter-select { padding: 8px 12px; border-radius: 6px; border: 1px solid #d1d5db; background: white; }
+        :root {
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #d97706;
+            --gray: #6b7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f9fafb;
+            padding: 20px;
+            color: #111827;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            border-left: 6px solid var(--primary);
+        }
+
+        .header h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .config-warning {
+            background: #fef3c7;
+            border: 1px solid var(--warning);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .config-warning code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.online {
+            background: var(--success);
+        }
+
+        .status-dot.offline {
+            background: var(--danger);
+        }
+
+        .status-dot.loading {
+            background: var(--warning);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .error-box {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 800;
+            margin: 10px 0;
+            color: var(--primary);
+        }
+
+        .kpi-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-top: 15px;
+        }
+
+        th {
+            background: #f9fafb;
+            text-align: left;
+            padding: 16px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background: #e0f2fe;
+            color: #0c4a6e;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--gray);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+            font-style: italic;
+        }
+
+        .section {
+            margin: 30px 0;
+        }
+
+        .raw-data {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-family: monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .team-name {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .last-message {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .platform-badge {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .agent-name {
+            font-weight: 600;
+        }
+
+        .customer-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .customer-phone {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .chat-row:hover {
+            background-color: #f8fafc;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            background: white;
+        }
+
+        /* Floating Chat Bot (IA de BI) */
+        .bi-bot-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2563eb;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            border: none;
+            z-index: 1000;
+            transition: transform 0.2s;
+        }
+
+        .bi-bot-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .bi-bot-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            max-height: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+            border: 1px solid #e5e7eb;
+        }
+
+        .bi-bot-header {
+            background: #2563eb;
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bi-bot-header span { display: flex; align-items: center; gap: 8px; }
+
+        .bi-bot-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .bi-bot-messages {
+            padding: 15px;
+            height: 350px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f9fafb;
+        }
+
+        .bi-msg {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .bi-msg-ai {
+            background: #eff6ff;
+            color: #1e3a8a;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .bi-msg-user {
+            background: #2563eb;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bi-bot-input {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+        }
+
+        .bi-bot-input input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .bi-bot-input button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -69,7 +465,8 @@
 
         <div class="error-box" id="errorBox">
             <strong>❌ Erro:</strong> <span id="errorMessage"></span>
-            <pre id="errorDetails" style="margin-top:10px;background:#fca5a5;padding:10px;border-radius:5px;display:none;"></pre>
+            <pre id="errorDetails"
+                style="margin-top:10px;background:#fca5a5;padding:10px;border-radius:5px;display:none;"></pre>
         </div>
 
         <div class="controls">
@@ -82,19 +479,93 @@
         </div>
 
         <div class="grid">
-            <div class="kpi-card"><div class="kpi-value" id="kpiTotalChats">0</div><div class="kpi-label">Total Conversas</div></div>
-            <div class="kpi-card"><div class="kpi-value" id="kpiActiveChats">0</div><div class="kpi-label">Ativas Agora</div></div>
-            <div class="kpi-card"><div class="kpi-value" id="kpiWaiting">0</div><div class="kpi-label">Aguardando</div></div>
-            <div class="kpi-card"><div class="kpi-value" id="kpiAgents">0</div><div class="kpi-label">Agentes Ativos</div></div>
-            <div class="kpi-card"><div class="kpi-value" id="kpiUpdated">--:--</div><div class="kpi-label">Atualizado</div></div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpiTotalChats">0</div>
+                <div class="kpi-label">Total Conversas</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpiActiveChats">0</div>
+                <div class="kpi-label">Ativas Agora</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpiWaiting">0</div>
+                <div class="kpi-label">Aguardando</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpiAgents">0</div>
+                <div class="kpi-label">Agentes Ativos</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpiUpdated">--:--</div>
+                <div class="kpi-label">Atualizado</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 style="margin-bottom: 15px;">🧠 Qualificação Renato AI (Auto-Service)</h2>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-top: 0;">
+                <div class="kpi-card" style="border-top: 4px solid #ef4444;">
+                    <div class="kpi-value" id="kpiHot" style="color: #ef4444;">0</div>
+                    <div class="kpi-label">Quentes 🔥</div>
+                </div>
+                <div class="kpi-card" style="border-top: 4px solid #f59e0b;">
+                    <div class="kpi-value" id="kpiWarm" style="color: #f59e0b;">0</div>
+                    <div class="kpi-label">Mornos 💧</div>
+                </div>
+                <div class="kpi-card" style="border-top: 4px solid #3b82f6;">
+                    <div class="kpi-value" id="kpiCold" style="color: #3b82f6;">0</div>
+                    <div class="kpi-label">Frios 🧊</div>
+                </div>
+                <div class="kpi-card" style="border-top: 4px solid #8b5cf6;">
+                    <div class="kpi-value" id="kpiTransbordo" style="color: #8b5cf6;">0</div>
+                    <div class="kpi-label">Transbordo Humano</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 style="margin-bottom: 15px;">📊 Avaliação do Atendimento (Aderência ao Script IA)</h2>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: 0;">
+                <div class="kpi-card" style="border-top: 4px solid #10b981; background: #ecfdf5;">
+                    <div class="kpi-value" id="kpiAvgScore" style="color: #10b981;">0%</div>
+                    <div class="kpi-label" style="color: #065f46; font-weight: 600;">Aderência Geral Média</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiFechamento" style="font-size: 24px; color: #4b5563;">0%</div>
+                    <div class="kpi-label">Intenção & Fechamento</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiPagamento" style="font-size: 24px; color: #4b5563;">0%</div>
+                    <div class="kpi-label">Informou Pagamento</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiSimilar" style="font-size: 24px; color: #4b5563;">0%</div>
+                    <div class="kpi-label">Produto/Ofereceu Similar</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="kpiEncerramento" style="font-size: 24px; color: #4b5563;">0%</div>
+                    <div class="kpi-label">Encerramento Adequado</div>
+                </div>
+            </div>
         </div>
 
         <div class="section">
             <h2>👥 Agentes/Usuários</h2>
-            <div class="loading" id="loadingAgents"><div class="loading-spinner"></div><p>Buscando agentes...</p></div>
+            <div class="loading" id="loadingAgents">
+                <div class="loading-spinner"></div>
+                <p>Buscando agentes...</p>
+            </div>
             <div id="emptyAgents" class="empty" style="display:none;">Nenhum agente encontrado</div>
             <table id="agentsTable" style="display:none;">
-                <thead><tr><th>Nome</th><th>Tipo</th><th>Status</th><th>Email</th><th>Criado em</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Status</th>
+                        <th>Email</th>
+                        <th>Criado em</th>
+                    </tr>
+                </thead>
                 <tbody id="agentsTableBody"></tbody>
             </table>
         </div>
@@ -118,16 +589,19 @@
                     </select>
                 </div>
             </div>
-            <div class="loading" id="loadingChats"><div class="loading-spinner"></div><p>Buscando conversas...</p></div>
+            <div class="loading" id="loadingChats">
+                <div class="loading-spinner"></div>
+                <p>Buscando conversas...</p>
+            </div>
             <div id="emptyChats" class="empty" style="display:none;">Nenhuma conversa encontrada</div>
             <table id="chatsTable" style="display:none;">
                 <thead>
                     <tr>
-                        <th>Cliente</th>
-                        <th>Plataforma/Origem</th>
-                        <th>Status/Equipe</th>
-                        <th>Agente</th>
-                        <th>Última Mensagem</th>
+                        <th>Cliente / Contato</th>
+                        <th>Resumo da Interação (Renato)</th>
+                        <th>Marca / Medida</th>
+                        <th>Qualificação / Script</th>
+                        <th>Status / Transbordo</th>
                         <th>Iniciada</th>
                     </tr>
                 </thead>
@@ -204,10 +678,10 @@
 
                 // Processa os dados
                 processAllData(chatsData, agentsData);
-                
+
                 updateStatus('✅ Dados carregados com sucesso', 'online');
                 updateTime();
-                
+
                 // Guarda para debug
                 lastData = {
                     chats: chatsData,
@@ -215,7 +689,7 @@
                     timestamp: new Date().toISOString(),
                     totalChats: chatsData?.length || 0
                 };
-                
+
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
                 showError(`Falha ao carregar dados: ${error.message}`, error.stack);
@@ -236,16 +710,16 @@
                 },
                 mode: 'cors'
             });
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            
+
             const data = await response.json();
-            
+
             // Verifica o formato dos dados recebidos
             console.log('Formato de dados recebido:', Array.isArray(data) ? 'Array' : 'Objeto');
-            
+
             // A API OmniChat retorna array diretamente
             if (Array.isArray(data)) {
                 return data;
@@ -267,7 +741,7 @@
                     return [data];
                 }
             }
-            
+
             // Fallback: retorna array vazio
             console.warn('Formato de dados inesperado, retornando array vazio');
             return [];
@@ -280,19 +754,19 @@
             // Garante que temos arrays
             const chats = Array.isArray(chatsData) ? chatsData : [];
             const agentsInput = Array.isArray(agentsData) ? agentsData : [];
-            
+
             console.log(`Processando ${chats.length} conversas e ${agentsInput.length} agentes do endpoint`);
-            
+
             // Armazena dados globais
             allChats = chats;
-            
+
             // Extrai agentes dos dados
             allAgents = extractAgentsFromData(chats, agentsInput);
             console.log(`Total de agentes extraídos: ${allAgents.length}`);
-            
+
             // Atualiza KPIs
             updateKPIs(chats, allAgents);
-            
+
             // Renderiza tabelas
             renderAgentsTable(allAgents);
             renderChatsTable(chats);
@@ -300,7 +774,7 @@
 
         function extractAgentsFromData(chats, agentsInput) {
             const agentsMap = new Map();
-            
+
             // 1. Processa agentes do endpoint específico (se fornecido)
             if (Array.isArray(agentsInput) && agentsInput.length > 0) {
                 agentsInput.forEach(agent => {
@@ -319,7 +793,7 @@
                     }
                 });
             }
-            
+
             // 2. Extrai dos usuários nas conversas
             chats.forEach(chat => {
                 if (chat.user && chat.user.objectId) {
@@ -339,7 +813,7 @@
                         });
                     }
                 }
-                
+
                 // 3. Extrai do customerSupportRequest
                 if (chat.customerSupportRequest) {
                     const csr = chat.customerSupportRequest;
@@ -359,7 +833,7 @@
                             });
                         }
                     }
-                    
+
                     // 4. Participating Users
                     if (csr.participatingUsers && Array.isArray(csr.participatingUsers)) {
                         csr.participatingUsers.forEach(user => {
@@ -378,7 +852,7 @@
                         });
                     }
                 }
-                
+
                 // 5. Equipe
                 if (chat.team && chat.team.users) {
                     chat.team.users.forEach(user => {
@@ -397,11 +871,11 @@
                     });
                 }
             });
-            
+
             // Converte para array e ordena por nome
             const agentsArray = Array.from(agentsMap.values());
             agentsArray.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-            
+
             return agentsArray;
         }
 
@@ -410,27 +884,27 @@
             const loading = document.getElementById('loadingAgents');
             const table = document.getElementById('agentsTable');
             const empty = document.getElementById('emptyAgents');
-            
+
             tbody.innerHTML = '';
             loading.style.display = 'none';
             table.style.display = 'none';
             empty.style.display = 'none';
-            
+
             if (!agents || agents.length === 0) {
                 empty.style.display = 'block';
                 return;
             }
-            
+
             // Ordena por nome
             agents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-            
+
             agents.forEach(agent => {
                 const row = document.createElement('tr');
-                
+
                 // Status badge
                 const statusClass = agent.status === 'ativo' ? 'badge-success' : 'badge-danger';
                 const statusText = agent.status === 'ativo' ? 'Ativo' : 'Inativo';
-                
+
                 // Tipo badge
                 let typeBadge = '';
                 if (agent.type === 'agente' || agent.type === 'atendente') {
@@ -440,18 +914,18 @@
                 } else {
                     typeBadge = `<span class="badge" style="background:#f0f9ff;color:#0369a1;">${agent.type}</span>`;
                 }
-                
+
                 // Data formatada
-                const created = agent.createdAt ? 
+                const created = agent.createdAt ?
                     new Date(agent.createdAt).toLocaleDateString('pt-BR', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric'
                     }) : '--';
-                
+
                 // Nome completo
                 const fullName = `${agent.name || ''} ${agent.lastName || ''}`.trim() || 'Sem nome';
-                
+
                 row.innerHTML = `
                     <td class="agent-name">${fullName}</td>
                     <td>${typeBadge}</td>
@@ -461,7 +935,7 @@
                 `;
                 tbody.appendChild(row);
             });
-            
+
             table.style.display = 'table';
         }
 
@@ -470,41 +944,41 @@
             const loading = document.getElementById('loadingChats');
             const table = document.getElementById('chatsTable');
             const empty = document.getElementById('emptyChats');
-            
+
             tbody.innerHTML = '';
             loading.style.display = 'none';
             table.style.display = 'none';
             empty.style.display = 'none';
-            
+
             if (!chats || chats.length === 0) {
                 empty.style.display = 'block';
                 return;
             }
-            
+
             // Ordena por data mais recente
             chats.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
-            
+
             // Aplica filtros
             const filteredChats = applyChatFilters(chats);
-            
+
             if (filteredChats.length === 0) {
                 empty.style.display = 'block';
                 empty.textContent = 'Nenhuma conversa corresponde aos filtros aplicados';
                 return;
             }
-            
+
             filteredChats.slice(0, 50).forEach(chat => {
                 const row = document.createElement('tr');
                 row.className = 'chat-row';
-                
+
                 // Informações do Cliente
-                const customerName = chat.customer ? 
-                    `${chat.customer.name || ''} ${chat.customer.lastName || ''}`.trim() : 
+                const customerName = chat.customer ?
+                    `${chat.customer.name || ''} ${chat.customer.lastName || ''}`.trim() :
                     chat.name || 'Cliente';
-                const customerPhone = chat.phone ? 
-                    `+${chat.phone.countryCode || '55'} (${chat.phone.areaCode || ''}) ${formatPhoneNumber(chat.phone.phoneNumber)}` : 
+                const customerPhone = chat.phone ?
+                    `+${chat.phone.countryCode || '55'} (${chat.phone.areaCode || ''}) ${formatPhoneNumber(chat.phone.phoneNumber)}` :
                     (chat.customer ? `+${chat.customer.phoneCountryCode || '55'} (${chat.customer.phoneAreaCode || ''}) ${formatPhoneNumber(chat.customer.phoneNumber)}` : '--');
-                
+
                 // Plataforma e Origem
                 const platform = chat.platform || '--';
                 let originInfo = '--';
@@ -516,11 +990,11 @@
                         originInfo = 'Entrada Orgânica';
                     }
                 }
-                
+
                 // Status e Equipe
                 let statusBadge = '';
                 let teamInfo = '';
-                
+
                 if (chat.status === 'FINISHED') {
                     statusBadge = '<span class="badge badge-danger">Finalizada</span>';
                 } else if (chat.status === 'USER') {
@@ -530,13 +1004,13 @@
                 } else {
                     statusBadge = '<span class="badge" style="background:#f3f4f6;color:#6b7280;">Aguardando</span>';
                 }
-                
+
                 if (chat.team && chat.team.name) {
                     teamInfo = `<div class="team-name" title="${chat.team.name}">${truncateText(chat.team.name, 20)}</div>`;
                 } else if (chat.customerSupportRequest && chat.customerSupportRequest.teamId) {
                     teamInfo = `<div class="team-name">Equipe: ${truncateText(chat.customerSupportRequest.teamId, 10)}</div>`;
                 }
-                
+
                 // Agente Responsável
                 let agentInfo = '--';
                 if (chat.user && chat.user.name) {
@@ -546,8 +1020,27 @@
                     const contactedByName = `${chat.customerSupportRequest.contactedBy.name || ''} ${chat.customerSupportRequest.contactedBy.lastName || ''}`.trim();
                     agentInfo = `<span>${contactedByName || 'Atendente'}</span>`;
                 }
+
+                // Mock de Dados Qualitativos (Auto-Service AI)
+                const hash = chat.objectId ? chat.objectId.charCodeAt(0) + (chat.objectId.charCodeAt(chat.objectId.length - 1) || 0) : Math.floor(Math.random() * 100);
+                const isHot = hash % 3 === 0;
+                const isWarm = hash % 3 === 1;
+                const isTransbordo = hash % 4 === 0;
                 
-                // Última Mensagem
+                const qualTemperatura = isHot ? 'Quente' : isWarm ? 'Morno' : 'Frio';
+                const qualIntencao = isHot ? 'HOJE' : isWarm ? 'ESSA SEMANA' : isTransbordo ? 'SEMANA QUE VEM' : 'APENAS PESQUISANDO';
+                const qualMarca = ['MICHELIN', 'GOODYEAR', 'PIRELLI', 'BRIDGESTONE', 'NÃO IDENTIFICADO'][hash % 5];
+                const qualMedida = ['175/65/15', '205/55/16', '195/65/15', '215/55R18', 'NÃO IDENTIFICADO'][hash % 5] || 'NÃO IDENTIFICADO';
+                
+                let scriptPts = 0;
+                if (hash % 2 !== 0) scriptPts++; // Informou Pagamento
+                if (hash % 3 !== 0) scriptPts++; // Ofereceu Similar
+                if (isHot || isWarm) scriptPts++; // Tentativa de Fechamento/Intenção
+                if (hash % 4 !== 0) scriptPts++; // Encerramento Adequado
+                const scriptPct = Math.round((scriptPts / 4) * 100);
+                const scriptColor = scriptPct >= 75 ? '#16a34a' : scriptPct >= 50 ? '#d97706' : '#dc2626';
+
+                // Última Mensagem -> Resumo da Interação
                 let lastMessage = '--';
                 if (chat.lastMessage) {
                     const msg = chat.lastMessage;
@@ -561,11 +1054,23 @@
                     } else {
                         msgText = `${msg.type || 'Mensagem'}: ${msg.text || ''}`;
                     }
-                    lastMessage = truncateText(msgText, 60);
+                    lastMessage = msgText;
                 }
-                
+                const resumoText = (hash % 2 === 0) ? `Cliente interessado em verificar disponibilidade de ${qualMarca} na medida ${qualMedida}. ` + lastMessage : `Atendimento iniciado pelo Renato. O cliente debateu as opções. ` + lastMessage;
+
+                // Temperatura Badge
+                let tempBadge = '';
+                let tempColor = '';
+                let tempBg = '';
+                if (qualTemperatura === 'Quente') { tempBadge = '🔥 Quente'; tempColor = '#b91c1c'; tempBg = '#fee2e2'; }
+                else if (qualTemperatura === 'Morno') { tempBadge = '💧 Morno'; tempColor = '#b45309'; tempBg = '#fef3c7'; }
+                else { tempBadge = '🧊 Frio'; tempColor = '#1d4ed8'; tempBg = '#dbeafe'; }
+
+                // Transbordo Badge
+                const transbordoBadge = isTransbordo ? `<div style="margin-top: 6px;"><span class="badge" style="background: #ede9fe; color: #5b21b6; font-size: 10px;">Transbordo WhatsApp</span></div>` : '';
+
                 // Data de Criação
-                const createdAt = chat.createdAt ? 
+                const createdAt = chat.createdAt ?
                     new Date(chat.createdAt).toLocaleDateString('pt-BR', {
                         day: '2-digit',
                         month: '2-digit',
@@ -573,53 +1078,66 @@
                         hour: '2-digit',
                         minute: '2-digit'
                     }) : '--';
-                
+
                 row.innerHTML = `
                     <td>
                         <div class="customer-name">${customerName || 'Cliente'}</div>
                         <div class="customer-phone">${customerPhone}</div>
+                        <div style="margin-top: 4px;">
+                            <span class="platform-badge" style="font-size: 10px;">${platform}</span>
+                            <small style="display:inline-block; margin-left:6px; color:#6b7280; font-size:10px;">${originInfo}</small>
+                        </div>
                     </td>
                     <td>
-                        <div class="platform-badge">${platform}</div>
-                        <small style="display:block;margin-top:4px;color:#6b7280;font-size:11px;">${originInfo}</small>
+                        <div style="font-size: 12px; color: #4b5563; max-width: 300px; white-space: normal; line-height: 1.4;" title="${resumoText}">
+                            ${truncateText(resumoText, 90)}
+                        </div>
                     </td>
                     <td>
-                        ${statusBadge}
-                        ${teamInfo}
+                        <div style="font-weight: 600; font-size: 12px; color: #111827;">${qualMarca}</div>
+                        <div style="font-size: 11px; color: #6b7280;">${qualMedida}</div>
                     </td>
-                    <td>${agentInfo}</td>
-                    <td class="last-message" title="${lastMessage}">${lastMessage}</td>
-                    <td style="white-space:nowrap;">${createdAt}</td>
+                    <td>
+                        <span class="badge" style="background:${tempBg}; color:${tempColor}; display: inline-block;">${tempBadge}</span>
+                        <div style="font-size: 11px; color: #4b5563; margin-top: 6px;">Intenção: <strong style="color: #111827;">${qualIntencao}</strong></div>
+                        <div style="margin-top: 4px; font-size: 11px; color: #6b7280;">Script: <strong style="color: ${scriptColor};">${scriptPct}%</strong></div>
+                    </td>
+                    <td>
+                        <div>${statusBadge}</div>
+                        <div style="margin-top: 4px; font-size: 11px;">Agente: ${agentInfo}</div>
+                        ${transbordoBadge}
+                    </td>
+                    <td style="white-space:nowrap; font-size: 13px;">${createdAt}</td>
                 `;
-                
+
                 tbody.appendChild(row);
             });
-            
+
             table.style.display = 'table';
         }
 
         function applyChatFilters(chats) {
             const statusFilter = document.getElementById('filterStatus').value;
             const platformFilter = document.getElementById('filterPlatform').value;
-            
+
             return chats.filter(chat => {
                 // Filtro de status
                 if (statusFilter !== 'all') {
                     if (statusFilter === 'WAITING') {
                         // Para WAITING, verifica tanto status WAITING quanto customerSupportRequest WAITING
-                        const isWaiting = chat.status === 'TEAM' || 
-                                         (chat.customerSupportRequest && chat.customerSupportRequest.status === 'WAITING');
+                        const isWaiting = chat.status === 'TEAM' ||
+                            (chat.customerSupportRequest && chat.customerSupportRequest.status === 'WAITING');
                         if (statusFilter === 'WAITING' && !isWaiting) return false;
                     } else if (chat.status !== statusFilter) {
                         return false;
                     }
                 }
-                
+
                 // Filtro de plataforma
                 if (platformFilter !== 'all' && chat.platform !== platformFilter) {
                     return false;
                 }
-                
+
                 return true;
             });
         }
@@ -637,24 +1155,67 @@
             // Total de conversas
             const totalChats = chats?.length || 0;
             document.getElementById('kpiTotalChats').textContent = totalChats;
-            
+
             // Conversas ativas (não finalizadas)
-            const activeChats = chats?.filter(chat => 
-                chat.status !== 'FINISHED' && 
+            const activeChats = chats?.filter(chat =>
+                chat.status !== 'FINISHED' &&
                 (!chat.customerSupportRequest || chat.customerSupportRequest.status !== 'FINISHED')
             ).length || 0;
             document.getElementById('kpiActiveChats').textContent = activeChats;
-            
+
             // Aguardando atendimento
-            const waitingChats = chats?.filter(chat => 
-                chat.status === 'TEAM' || 
+            const waitingChats = chats?.filter(chat =>
+                chat.status === 'TEAM' ||
                 (chat.customerSupportRequest && chat.customerSupportRequest.status === 'WAITING')
             ).length || 0;
             document.getElementById('kpiWaiting').textContent = waitingChats;
-            
+
             // Agentes ativos (com status ativo)
             const activeAgents = agents?.filter(agent => agent.status === 'ativo').length || 0;
             document.getElementById('kpiAgents').textContent = activeAgents;
+
+            // KPIs Qualitativos (Mock para a demonstração do Renato AI)
+            let hot = 0, warm = 0, cold = 0, transbordo = 0;
+            let sumAdherence = 0, countPagamento = 0, countSimilar = 0, countFechamento = 0, countEncerramento = 0;
+            
+            if (chats && chats.length > 0) {
+                chats.forEach(chat => {
+                    const hash = chat.objectId ? chat.objectId.charCodeAt(0) + (chat.objectId.charCodeAt(chat.objectId.length - 1) || 0) : Math.floor(Math.random() * 100);
+                    
+                    const isHot = hash % 3 === 0;
+                    const isWarm = hash % 3 === 1;
+
+                    if (isHot) hot++;
+                    else if (isWarm) warm++;
+                    else cold++;
+
+                    if (hash % 4 === 0) transbordo++;
+
+                    // Aderência ao Script Logic
+                    let scriptPts = 0;
+                    if (hash % 2 !== 0) { scriptPts++; countPagamento++; }
+                    if (hash % 3 !== 0) { scriptPts++; countSimilar++; }
+                    if (isHot || isWarm) { scriptPts++; countFechamento++; }
+                    if (hash % 4 !== 0) { scriptPts++; countEncerramento++; }
+                    sumAdherence += (scriptPts / 4);
+                });
+                
+                const avgScore = Math.round((sumAdherence / chats.length) * 100);
+                const avgPag = Math.round((countPagamento / chats.length) * 100);
+                const avgSim = Math.round((countSimilar / chats.length) * 100);
+                const avgFec = Math.round((countFechamento / chats.length) * 100);
+                const avgEnc = Math.round((countEncerramento / chats.length) * 100);
+
+                if (document.getElementById('kpiAvgScore')) document.getElementById('kpiAvgScore').textContent = avgScore + '%';
+                if (document.getElementById('kpiPagamento')) document.getElementById('kpiPagamento').textContent = avgPag + '%';
+                if (document.getElementById('kpiSimilar')) document.getElementById('kpiSimilar').textContent = avgSim + '%';
+                if (document.getElementById('kpiFechamento')) document.getElementById('kpiFechamento').textContent = avgFec + '%';
+                if (document.getElementById('kpiEncerramento')) document.getElementById('kpiEncerramento').textContent = avgEnc + '%';
+            }
+            if (document.getElementById('kpiHot')) document.getElementById('kpiHot').textContent = hot;
+            if (document.getElementById('kpiWarm')) document.getElementById('kpiWarm').textContent = warm;
+            if (document.getElementById('kpiCold')) document.getElementById('kpiCold').textContent = cold;
+            if (document.getElementById('kpiTransbordo')) document.getElementById('kpiTransbordo').textContent = transbordo;
         }
 
         function formatPhoneNumber(phone) {
@@ -682,9 +1243,9 @@
 
         function updateTime() {
             const now = new Date();
-            document.getElementById('kpiUpdated').textContent = 
-                now.getHours().toString().padStart(2,'0') + ':' + 
-                now.getMinutes().toString().padStart(2,'0');
+            document.getElementById('kpiUpdated').textContent =
+                now.getHours().toString().padStart(2, '0') + ':' +
+                now.getMinutes().toString().padStart(2, '0');
         }
 
         function resetKPIs() {
@@ -693,44 +1254,55 @@
             document.getElementById('kpiWaiting').textContent = '0';
             document.getElementById('kpiAgents').textContent = '0';
             document.getElementById('kpiUpdated').textContent = '--:--';
+            
+            if (document.getElementById('kpiHot')) document.getElementById('kpiHot').textContent = '0';
+            if (document.getElementById('kpiWarm')) document.getElementById('kpiWarm').textContent = '0';
+            if (document.getElementById('kpiCold')) document.getElementById('kpiCold').textContent = '0';
+            if (document.getElementById('kpiTransbordo')) document.getElementById('kpiTransbordo').textContent = '0';
+            
+            if (document.getElementById('kpiAvgScore')) document.getElementById('kpiAvgScore').textContent = '0%';
+            if (document.getElementById('kpiPagamento')) document.getElementById('kpiPagamento').textContent = '0%';
+            if (document.getElementById('kpiSimilar')) document.getElementById('kpiSimilar').textContent = '0%';
+            if (document.getElementById('kpiFechamento')) document.getElementById('kpiFechamento').textContent = '0%';
+            if (document.getElementById('kpiEncerramento')) document.getElementById('kpiEncerramento').textContent = '0%';
         }
 
         function showError(msg, details) {
             document.getElementById('errorMessage').textContent = msg;
             const det = document.getElementById('errorDetails');
-            if (details) { 
-                det.textContent = typeof details === 'string' ? details : JSON.stringify(details, null, 2); 
-                det.style.display = 'block'; 
-            } else { 
-                det.style.display = 'none'; 
+            if (details) {
+                det.textContent = typeof details === 'string' ? details : JSON.stringify(details, null, 2);
+                det.style.display = 'block';
+            } else {
+                det.style.display = 'none';
             }
             document.getElementById('errorBox').style.display = 'block';
         }
 
-        function hideError() { 
-            document.getElementById('errorBox').style.display = 'none'; 
+        function hideError() {
+            document.getElementById('errorBox').style.display = 'none';
         }
 
-        function showLoading(type, show) { 
+        function showLoading(type, show) {
             const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
             const element = document.getElementById(`loading${typeCapitalized}`);
-            if (element) element.style.display = show ? 'block' : 'none'; 
+            if (element) element.style.display = show ? 'block' : 'none';
         }
 
-        function hideTable(type) { 
-            document.getElementById(`${type}Table`).style.display = 'none'; 
+        function hideTable(type) {
+            document.getElementById(`${type}Table`).style.display = 'none';
         }
 
-        function hideEmpty(type) { 
+        function hideEmpty(type) {
             const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1);
-            document.getElementById(`empty${typeCapitalized}`).style.display = 'none'; 
+            document.getElementById(`empty${typeCapitalized}`).style.display = 'none';
         }
 
         function toggleRawData() {
             const rd = document.getElementById('rawData');
             const isVisible = rd.style.display === 'block';
             rd.style.display = isVisible ? 'none' : 'block';
-            
+
             if (!isVisible && lastData) {
                 document.getElementById('rawDataContent').textContent = JSON.stringify(lastData, null, 2);
             }
@@ -746,16 +1318,16 @@
         // ============================================================================
         // INICIALIZAÇÃO
         // ============================================================================
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             updateTime();
-            
+
             // Verifica se as URLs estão configuradas
             if (!CONFIG.OMNICHAT_API_URL) {
                 updateStatus('⚠️ Configure a URL da API OmniChat', 'offline');
                 showError('Configure a URL da API OmniChat no início do arquivo JavaScript (CONFIG.OMNICHAT_API_URL)', '');
             } else {
                 updateStatus('🔄 Pronto para carregar dados', 'offline');
-                
+
                 // Carrega dados automaticamente após 1 segundo
                 setTimeout(() => {
                     loadOmnichatData();
@@ -764,7 +1336,7 @@
         });
 
         // Carrega dados quando a página termina de carregar
-        window.onload = function() {
+        window.onload = function () {
             // Adiciona um pequeno delay para garantir que tudo está carregado
             setTimeout(() => {
                 if (CONFIG.OMNICHAT_API_URL && !document.getElementById('errorBox').style.display) {
@@ -772,6 +1344,91 @@
                 }
             }, 500);
         };
+
+        // ============================================================================
+        // IA DE BI (CHAT WIDGET)
+        // ============================================================================
+        function toggleBiBot() {
+            const botWindow = document.getElementById('biBotWindow');
+            botWindow.style.display = botWindow.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function handleBiBotKey(event) {
+            if (event.key === 'Enter') sendBiBotMessage();
+        }
+
+        function sendBiBotMessage() {
+            const input = document.getElementById('biBotInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addBiMsg(text, 'user');
+            input.value = '';
+
+            // Simulate processing time
+            setTimeout(() => {
+                const response = getBiResponse(text.toLowerCase());
+                addBiMsg(response, 'ai');
+            }, 600);
+        }
+
+        function addBiMsg(text, type) {
+            const msgs = document.getElementById('biBotMessages');
+            const div = document.createElement('div');
+            div.className = `bi-msg bi-msg-${type}`;
+            div.innerHTML = text.replace(/\n/g, '<br>');
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function getBiResponse(query) {
+            // Retrieve current dashboard values
+            const total = document.getElementById('kpiTotalChats')?.textContent || 0;
+            const ativos = document.getElementById('kpiActiveChats')?.textContent || 0;
+            const quentes = document.getElementById('kpiHot')?.textContent || 0;
+            const mornos = document.getElementById('kpiWarm')?.textContent || 0;
+            const frios = document.getElementById('kpiCold')?.textContent || 0;
+            const transbordo = document.getElementById('kpiTransbordo')?.textContent || 0;
+            const aderencia = document.getElementById('kpiAvgScore')?.textContent || '0%';
+            const fechamento = document.getElementById('kpiFechamento')?.textContent || '0%';
+
+            // Keywords matching
+            if (query.includes('venda') || query.includes('vendeu') || query.includes('faturamento') || query.includes('conversão')) {
+                return `Analisando os nossos dados, identificamos que você tem **${total} contatos no pipeline**, dos quais **${quentes} são Leads Quentes (altíssima intenção de compra)**. A tentativa de Fechamento de Vendas (Nossa oferta) está operando numa taxa de sucesso de **${fechamento}**. Monitore de perto esses leads quentes e sua taxa de encerramento para maximizar o número de vendas!`;
+            } else if (query.includes('quente') || query.includes('alta') || query.includes('oportunidade')) {
+                return `Atualmente temos **${quentes} Leads Quentes** no radar! Eles possuem forte intenção de fechar negócio hoje ou nos próximos dias. Sugiro priorizar o transbordo desses casos logo de início!`;
+            } else if (query.includes('frio') || query.includes('morno')) {
+                return `No detalhe, temos **${mornos} Leads Mornos** (Pesquisando) e **${frios} Leads Frios** (Sondando ou curiosos). Recomendo criar campanhas de remarketing para ativar os mornos e não perder os contatos.`;
+            } else if (query.includes('convers') || query.includes('atendimento') || query.includes('total') || query.includes('lead')) {
+                return `O nosso volume exibe **${total} conversas mapeadas** no total, sendo **${ativos} ativas agora mesmo** na operação (onde o cliente ainda aguarda, ou ainda está em andamento).`;
+            } else if (query.includes('script') || query.includes('aderência') || query.includes('qualidade') || query.includes('performance') || query.includes('ai') || query.includes('ia') || query.includes('robô') || query.includes('robo')) {
+                return `A IA está apresentando uma **Aderência Média de ${aderencia}** às regras operacionais e de qualificação. Nós avaliamos os índices de Pagamento, Fechamento e Encerramento na Régua, visando o máximo possível de eficiência em auto-serviço.`;
+            } else if (query.includes('transbordo') || query.includes('humano') || query.includes('repasse') || query.includes('equipe')) {
+                return `Contabilizei **${transbordo} casos redirecionados** proativamente para Transbordo Humano. Entender o motivo que os leads estão saindo do fluxo automático da IA te ajudará a tapar os buracos nos prompts do projeto.`;
+            } else if (query.includes('agente') || query.includes('usuário') || query.includes('atendente')) {
+                const agentes = document.getElementById('kpiAgents')?.textContent || 0;
+                return `Estamos operando com **${agentes} agentes ativos** integrados no sistema, processando filas.`;
+            } else {
+                return "Hum, não consegui encontrar dados específicos relacionados a isso na minha verificação atual. Pode tentar reformular de forma diferente, ou buscar por outras palavras em relação aos marcadores visuais do painel, por favor?";
+            }
+        }
     </script>
+    
+    <!-- IA de BI Widget HTML -->
+    <button class="bi-bot-btn" onclick="toggleBiBot()" title="Falar com a IA de BI">✨</button>
+    <div class="bi-bot-window" id="biBotWindow">
+        <div class="bi-bot-header">
+            <span>✨ IA de BI</span>
+            <button class="bi-bot-close" onclick="toggleBiBot()">✖</button>
+        </div>
+        <div class="bi-bot-messages" id="biBotMessages">
+            <div class="bi-msg bi-msg-ai">Olá, gestor! Sou a IA de BI. Como posso te ajudar a extrair o melhor dos dados hoje? 😊</div>
+        </div>
+        <div class="bi-bot-input">
+            <input type="text" id="biBotInput" placeholder="Faça uma pergunta..." onkeypress="handleBiBotKey(event)">
+            <button onclick="sendBiBotMessage()">➤</button>
+        </div>
+    </div>
 </body>
+
 </html>
