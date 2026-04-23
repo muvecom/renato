@@ -378,7 +378,11 @@
             align-items: center;
         }
 
-        .bi-bot-header span { display: flex; align-items: center; gap: 8px; }
+        .bi-bot-header span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         .bi-bot-close {
             background: none;
@@ -701,8 +705,17 @@
         }
 
         async function fetchFromAPI(url) {
-            console.log('Fetching from:', url);
-            const response = await fetch(url, {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            
+            let finalUrl = url;
+            if (token) {
+                const separator = finalUrl.includes('?') ? '&' : '?';
+                finalUrl = `${finalUrl}${separator}token=${token}`;
+            }
+
+            console.log('Fetching from:', finalUrl);
+            const response = await fetch(finalUrl, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1026,12 +1039,12 @@
                 const isHot = hash % 3 === 0;
                 const isWarm = hash % 3 === 1;
                 const isTransbordo = hash % 4 === 0;
-                
+
                 const qualTemperatura = isHot ? 'Quente' : isWarm ? 'Morno' : 'Frio';
                 const qualIntencao = isHot ? 'HOJE' : isWarm ? 'ESSA SEMANA' : isTransbordo ? 'SEMANA QUE VEM' : 'APENAS PESQUISANDO';
                 const qualMarca = ['MICHELIN', 'GOODYEAR', 'PIRELLI', 'BRIDGESTONE', 'NÃO IDENTIFICADO'][hash % 5];
                 const qualMedida = ['175/65/15', '205/55/16', '195/65/15', '215/55R18', 'NÃO IDENTIFICADO'][hash % 5] || 'NÃO IDENTIFICADO';
-                
+
                 let scriptPts = 0;
                 if (hash % 2 !== 0) scriptPts++; // Informou Pagamento
                 if (hash % 3 !== 0) scriptPts++; // Ofereceu Similar
@@ -1177,11 +1190,11 @@
             // KPIs Qualitativos (Mock para a demonstração do Renato AI)
             let hot = 0, warm = 0, cold = 0, transbordo = 0;
             let sumAdherence = 0, countPagamento = 0, countSimilar = 0, countFechamento = 0, countEncerramento = 0;
-            
+
             if (chats && chats.length > 0) {
                 chats.forEach(chat => {
                     const hash = chat.objectId ? chat.objectId.charCodeAt(0) + (chat.objectId.charCodeAt(chat.objectId.length - 1) || 0) : Math.floor(Math.random() * 100);
-                    
+
                     const isHot = hash % 3 === 0;
                     const isWarm = hash % 3 === 1;
 
@@ -1199,7 +1212,7 @@
                     if (hash % 4 !== 0) { scriptPts++; countEncerramento++; }
                     sumAdherence += (scriptPts / 4);
                 });
-                
+
                 const avgScore = Math.round((sumAdherence / chats.length) * 100);
                 const avgPag = Math.round((countPagamento / chats.length) * 100);
                 const avgSim = Math.round((countSimilar / chats.length) * 100);
@@ -1254,12 +1267,12 @@
             document.getElementById('kpiWaiting').textContent = '0';
             document.getElementById('kpiAgents').textContent = '0';
             document.getElementById('kpiUpdated').textContent = '--:--';
-            
+
             if (document.getElementById('kpiHot')) document.getElementById('kpiHot').textContent = '0';
             if (document.getElementById('kpiWarm')) document.getElementById('kpiWarm').textContent = '0';
             if (document.getElementById('kpiCold')) document.getElementById('kpiCold').textContent = '0';
             if (document.getElementById('kpiTransbordo')) document.getElementById('kpiTransbordo').textContent = '0';
-            
+
             if (document.getElementById('kpiAvgScore')) document.getElementById('kpiAvgScore').textContent = '0%';
             if (document.getElementById('kpiPagamento')) document.getElementById('kpiPagamento').textContent = '0%';
             if (document.getElementById('kpiSimilar')) document.getElementById('kpiSimilar').textContent = '0%';
@@ -1413,7 +1426,7 @@
             }
         }
     </script>
-    
+
     <!-- IA de BI Widget HTML -->
     <button class="bi-bot-btn" onclick="toggleBiBot()" title="Falar com a IA de BI">✨</button>
     <div class="bi-bot-window" id="biBotWindow">
@@ -1422,7 +1435,8 @@
             <button class="bi-bot-close" onclick="toggleBiBot()">✖</button>
         </div>
         <div class="bi-bot-messages" id="biBotMessages">
-            <div class="bi-msg bi-msg-ai">Olá, gestor! Sou a IA de BI. Como posso te ajudar a extrair o melhor dos dados hoje? 😊</div>
+            <div class="bi-msg bi-msg-ai">Olá, gestor! Sou a IA de BI. Como posso te ajudar a extrair o melhor dos dados
+                hoje? 😊</div>
         </div>
         <div class="bi-bot-input">
             <input type="text" id="biBotInput" placeholder="Faça uma pergunta..." onkeypress="handleBiBotKey(event)">
