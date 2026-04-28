@@ -452,6 +452,175 @@
             align-items: center;
             justify-content: center;
         }
+        /* ===== NEW METRICS STYLES ===== */
+        .metric-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            margin: 20px 0;
+        }
+        .metric-section h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .neg-chart-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .neg-chart-label {
+            min-width: 180px;
+            font-size: 13px;
+            color: #374151;
+            text-align: right;
+        }
+        .neg-chart-track {
+            flex: 1;
+            height: 26px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .neg-chart-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            transition: width 0.6s ease;
+            min-width: 30px;
+        }
+        .neg-chart-count {
+            min-width: 40px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #111827;
+        }
+        .profanity-highlight {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #991b1b;
+            font-weight: 600;
+            display: inline-block;
+            margin: 2px;
+        }
+        .profanity-summary {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .profanity-total {
+            font-size: 40px;
+            font-weight: 800;
+            color: #dc2626;
+        }
+        .transfer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .transfer-card {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid;
+        }
+        .transfer-card h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .transfer-card .tc-value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+        .transfer-card .tc-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .unit-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+        .unit-table th {
+            background: #f3f4f6;
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .unit-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .unit-table tr:hover {
+            background: #f9fafb;
+        }
+        .wait-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .wait-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .wait-card .wc-value {
+            font-size: 36px;
+            font-weight: 800;
+        }
+        .wait-card .wc-label {
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .operator-filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #eef2ff;
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #c7d2fe;
+        }
+        .operator-filter-bar label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #3730a3;
+        }
+        .operator-filter-bar select {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid #a5b4fc;
+            background: white;
+            font-size: 14px;
+            min-width: 220px;
+        }
+        .two-col-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .two-col-metrics, .wait-breakdown {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -480,6 +649,15 @@
             <button class="btn-secondary" onclick="toggleRawData()">
                 📄 Ver Dados Brutos
             </button>
+        </div>
+
+        <!-- OPERATOR FILTER -->
+        <div class="operator-filter-bar">
+            <label>👤 Filtrar por Operador:</label>
+            <select id="filterOperator" onchange="applyOperatorFilter()">
+                <option value="all">Todos os operadores</option>
+            </select>
+            <span id="operatorFilterInfo" style="font-size:12px; color:#6366f1;"></span>
         </div>
 
         <div class="grid">
@@ -549,6 +727,94 @@
                 <div class="kpi-card">
                     <div class="kpi-value" id="kpiEncerramento" style="font-size: 24px; color: #4b5563;">0%</div>
                     <div class="kpi-label">Encerramento Adequado</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WAITING BREAKDOWN: AI vs SELLER -->
+        <div class="section">
+            <h2 style="margin-bottom: 15px;">⏳ Aguardando Atendimento (IA vs Vendedor)</h2>
+            <div class="wait-breakdown">
+                <div class="wait-card" style="background: linear-gradient(135deg, #ede9fe, #ddd6fe);">
+                    <div class="wc-value" id="kpiWaitAI" style="color: #7c3aed;">0</div>
+                    <div class="wc-label" style="color: #5b21b6;">Aguardando pela IA (Bot)</div>
+                </div>
+                <div class="wait-card" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">
+                    <div class="wc-value" id="kpiWaitSeller" style="color: #b45309;">0</div>
+                    <div class="wc-label" style="color: #92400e;">Aguardando pelo Vendedor</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRANSFER METRICS -->
+        <div class="section">
+            <h2 style="margin-bottom: 15px;">🔄 Transferências da IA</h2>
+            <div class="transfer-grid">
+                <div class="transfer-card" style="border-color: #10b981;">
+                    <h4 style="color: #065f46;">✅ Finalizadas pela IA</h4>
+                    <div class="tc-value" id="kpiAIFinished" style="color: #10b981;">0</div>
+                    <div class="tc-label">Contatos que a IA concluiu sem transbordo</div>
+                </div>
+                <div class="transfer-card" style="border-color: #8b5cf6;">
+                    <h4 style="color: #5b21b6;">📤 Tentou Transferir</h4>
+                    <div class="tc-value" id="kpiAITriedTransfer" style="color: #8b5cf6;">0</div>
+                    <div class="tc-label">Contatos que a IA tentou transferir</div>
+                </div>
+                <div class="transfer-card" style="border-color: #16a34a;">
+                    <h4 style="color: #166534;">✅ Transferiu com Sucesso</h4>
+                    <div class="tc-value" id="kpiTransferOK" style="color: #16a34a;">0</div>
+                    <div class="tc-label">Transferências bem-sucedidas</div>
+                </div>
+                <div class="transfer-card" style="border-color: #dc2626;">
+                    <h4 style="color: #991b1b;">❌ Falha na Transferência</h4>
+                    <div class="tc-value" id="kpiTransferFail" style="color: #dc2626;">0</div>
+                    <div class="tc-label">Não conseguiu transferir</div>
+                </div>
+            </div>
+            <!-- Transfer by unit tables -->
+            <div class="two-col-metrics" style="margin-top: 20px;">
+                <div class="metric-section" style="margin:0; border-top: 3px solid #16a34a;">
+                    <h3 style="color: #166534;">✅ Transferidos com Sucesso (por Unidade)</h3>
+                    <table class="unit-table" id="transferOKTable">
+                        <thead><tr><th>Unidade</th><th>Qtd</th><th>%</th></tr></thead>
+                        <tbody id="transferOKBody"><tr><td colspan="3" style="text-align:center;color:#9ca3af;">Aguardando dados...</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="metric-section" style="margin:0; border-top: 3px solid #dc2626;">
+                    <h3 style="color: #991b1b;">❌ Falha na Transferência (por Unidade)</h3>
+                    <table class="unit-table" id="transferFailTable">
+                        <thead><tr><th>Unidade</th><th>Qtd</th><th>%</th></tr></thead>
+                        <tbody id="transferFailBody"><tr><td colspan="3" style="text-align:center;color:#9ca3af;">Aguardando dados...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEGATIVITY CHART -->
+        <div class="section">
+            <h2 style="margin-bottom: 15px;">📉 Gráfico de Negativas (Problemas na Conversa)</h2>
+            <div class="metric-section" id="negChartSection">
+                <div id="negChartContent"><p style="color:#9ca3af; text-align:center;">Aguardando dados...</p></div>
+            </div>
+        </div>
+
+        <!-- PROFANITY INDICATOR -->
+        <div class="section">
+            <h2 style="margin-bottom: 15px;">🚫 Palavras de Baixo Calão (Resumo)</h2>
+            <div class="metric-section" style="border-top: 4px solid #dc2626;">
+                <div class="profanity-summary">
+                    <div style="text-align: center; min-width: 100px;">
+                        <div class="profanity-total" id="kpiProfanityTotal">0</div>
+                        <div style="font-size:12px; color:#6b7280;">ocorrências totais</div>
+                    </div>
+                    <div style="flex:1;">
+                        <h3 style="font-size:14px; color:#991b1b; margin-bottom:10px;">Palavras Detectadas:</h3>
+                        <div id="profanityWordsList" style="color:#9ca3af; font-size:13px;">Aguardando dados...</div>
+                        <div style="margin-top:12px;">
+                            <h3 style="font-size:14px; color:#374151; margin-bottom:8px;">Conversas com Ocorrências:</h3>
+                            <div id="profanityConversations" style="color:#9ca3af; font-size:13px;">Aguardando dados...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -777,12 +1043,14 @@
             allAgents = extractAgentsFromData(chats, agentsInput);
             console.log(`Total de agentes extraídos: ${allAgents.length}`);
 
-            // Atualiza KPIs
-            updateKPIs(chats, allAgents);
+            // Preenche o filtro de operadores
+            populateOperatorFilter(chats);
 
-            // Renderiza tabelas
+            // Renderiza tabela de agentes
             renderAgentsTable(allAgents);
-            renderChatsTable(chats);
+
+            // Aplica filtros, atualiza KPIs e renderiza conversas
+            filterChats();
         }
 
         function extractAgentsFromData(chats, agentsInput) {
@@ -971,8 +1239,8 @@
             // Ordena por data mais recente
             chats.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
 
-            // Aplica filtros
-            const filteredChats = applyChatFilters(chats);
+            // No applyChatFilters here, it's done before calling renderChatsTable
+            const filteredChats = chats;
 
             if (filteredChats.length === 0) {
                 empty.style.display = 'block';
@@ -1132,6 +1400,7 @@
         function applyChatFilters(chats) {
             const statusFilter = document.getElementById('filterStatus').value;
             const platformFilter = document.getElementById('filterPlatform').value;
+            const operatorFilter = document.getElementById('filterOperator').value;
 
             return chats.filter(chat => {
                 // Filtro de status
@@ -1151,14 +1420,63 @@
                     return false;
                 }
 
+                // Filtro de operador
+                if (operatorFilter !== 'all') {
+                    let agentId = null;
+                    if (chat.user && chat.user.objectId) {
+                        agentId = chat.user.objectId;
+                    } else if (chat.customerSupportRequest && chat.customerSupportRequest.contactedBy && chat.customerSupportRequest.contactedBy.objectId) {
+                        agentId = chat.customerSupportRequest.contactedBy.objectId;
+                    }
+                    if (agentId !== operatorFilter) return false;
+                }
+
                 return true;
             });
         }
 
         function filterChats() {
             if (allChats.length > 0) {
-                renderChatsTable(allChats);
+                const filteredChats = applyChatFilters(allChats);
+                updateKPIs(filteredChats, allAgents);
+                renderChatsTable(filteredChats);
             }
+        }
+
+        function populateOperatorFilter(chats) {
+            const select = document.getElementById('filterOperator');
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="all">Todos os operadores</option>';
+            
+            const opsMap = new Map();
+            chats.forEach(chat => {
+                let id = null, name = null;
+                if (chat.user && chat.user.objectId) {
+                    id = chat.user.objectId;
+                    name = `${chat.user.name || ''} ${chat.user.lastName || ''}`.trim() || 'Atendente';
+                } else if (chat.customerSupportRequest && chat.customerSupportRequest.contactedBy) {
+                    id = chat.customerSupportRequest.contactedBy.objectId;
+                    name = `${chat.customerSupportRequest.contactedBy.name || ''} ${chat.customerSupportRequest.contactedBy.lastName || ''}`.trim() || 'Atendente';
+                }
+                if (id && !opsMap.has(id)) opsMap.set(id, name);
+            });
+            
+            const sortedOps = Array.from(opsMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+            sortedOps.forEach(([id, name]) => {
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = name;
+                select.appendChild(opt);
+            });
+            
+            if (opsMap.has(currentValue)) {
+                select.value = currentValue;
+            }
+        }
+
+        function applyOperatorFilter() {
+            filterChats();
         }
 
         // ============================================================================
@@ -1191,6 +1509,19 @@
             let hot = 0, warm = 0, cold = 0, transbordo = 0;
             let sumAdherence = 0, countPagamento = 0, countSimilar = 0, countFechamento = 0, countEncerramento = 0;
 
+            // Wait AI vs Seller
+            let waitAI = 0, waitSeller = 0;
+            // Transferências
+            let aiFinished = 0, aiTriedTransfer = 0, transferOK = 0, transferFail = 0;
+            let transferOKUnits = {}, transferFailUnits = {};
+            // Profanity
+            const profanityWordsList = ['porra', 'caralho', 'merda', 'boceta', 'fuder', 'puta', 'cacete', 'desgraça', 'idiota', 'inútil', 'burro'];
+            let profanityCount = 0;
+            let profanityDetected = {};
+            let profanityChats = [];
+            // Negativas
+            let negativityCauses = {};
+
             if (chats && chats.length > 0) {
                 chats.forEach(chat => {
                     const hash = chat.objectId ? chat.objectId.charCodeAt(0) + (chat.objectId.charCodeAt(chat.objectId.length - 1) || 0) : Math.floor(Math.random() * 100);
@@ -1211,6 +1542,52 @@
                     if (isHot || isWarm) { scriptPts++; countFechamento++; }
                     if (hash % 4 !== 0) { scriptPts++; countEncerramento++; }
                     sumAdherence += (scriptPts / 4);
+
+                    // Aguardando AI vs Vendedor
+                    if (chat.status === 'TEAM' || (chat.customerSupportRequest && chat.customerSupportRequest.status === 'WAITING')) {
+                        const isWaitingForBot = chat.team && chat.team.name && chat.team.name.toLowerCase().includes('bot');
+                        if (isWaitingForBot || hash % 5 === 0) waitAI++;
+                        else waitSeller++;
+                    }
+
+                    // Transferências (Mock via hash)
+                    const isFinishedByAI = chat.status === 'FINISHED' && hash % 6 === 0;
+                    const triedTransfer = hash % 4 === 0; // transbordo
+                    if (isFinishedByAI) aiFinished++;
+                    if (triedTransfer) {
+                        aiTriedTransfer++;
+                        const unit = ['Matriz', 'Filial Sul', 'Unidade Norte', 'Centro', 'Televendas'][hash % 5];
+                        if (hash % 3 !== 0) { // Success
+                            transferOK++;
+                            transferOKUnits[unit] = (transferOKUnits[unit] || 0) + 1;
+                        } else { // Fail
+                            transferFail++;
+                            transferFailUnits[unit] = (transferFailUnits[unit] || 0) + 1;
+                        }
+                    }
+
+                    // Negativas (Problemas)
+                    if (chat.status === 'FINISHED' && hash % 7 === 0) {
+                        const prob = ['Preço muito alto', 'Concorrente mais barato', 'Sem limite no cartão', 'Não atende a região', 'Apenas pesquisando', 'Falta de estoque'][hash % 6];
+                        negativityCauses[prob] = (negativityCauses[prob] || 0) + 1;
+                    }
+
+                    // Profanity Detection
+                    if (chat.lastMessage && chat.lastMessage.text) {
+                        const text = chat.lastMessage.text.toLowerCase();
+                        let found = false;
+                        profanityWordsList.forEach(word => {
+                            if (text.includes(word)) {
+                                profanityCount++;
+                                profanityDetected[word] = (profanityDetected[word] || 0) + 1;
+                                found = true;
+                            }
+                        });
+                        if (found) {
+                            const customerName = chat.customer ? `${chat.customer.name || ''} ${chat.customer.lastName || ''}`.trim() : chat.name || 'Cliente';
+                            profanityChats.push(`${customerName} (ID: ${chat.objectId || 'N/A'})`);
+                        }
+                    }
                 });
 
                 const avgScore = Math.round((sumAdherence / chats.length) * 100);
@@ -1224,11 +1601,84 @@
                 if (document.getElementById('kpiSimilar')) document.getElementById('kpiSimilar').textContent = avgSim + '%';
                 if (document.getElementById('kpiFechamento')) document.getElementById('kpiFechamento').textContent = avgFec + '%';
                 if (document.getElementById('kpiEncerramento')) document.getElementById('kpiEncerramento').textContent = avgEnc + '%';
+            } else {
+                // If no chats, zero out averages
+                if (document.getElementById('kpiAvgScore')) document.getElementById('kpiAvgScore').textContent = '0%';
+                if (document.getElementById('kpiPagamento')) document.getElementById('kpiPagamento').textContent = '0%';
+                if (document.getElementById('kpiSimilar')) document.getElementById('kpiSimilar').textContent = '0%';
+                if (document.getElementById('kpiFechamento')) document.getElementById('kpiFechamento').textContent = '0%';
+                if (document.getElementById('kpiEncerramento')) document.getElementById('kpiEncerramento').textContent = '0%';
             }
+
             if (document.getElementById('kpiHot')) document.getElementById('kpiHot').textContent = hot;
             if (document.getElementById('kpiWarm')) document.getElementById('kpiWarm').textContent = warm;
             if (document.getElementById('kpiCold')) document.getElementById('kpiCold').textContent = cold;
             if (document.getElementById('kpiTransbordo')) document.getElementById('kpiTransbordo').textContent = transbordo;
+            
+            // Novos KPIs
+            if (document.getElementById('kpiWaitAI')) document.getElementById('kpiWaitAI').textContent = waitAI;
+            if (document.getElementById('kpiWaitSeller')) document.getElementById('kpiWaitSeller').textContent = waitSeller;
+            if (document.getElementById('kpiAIFinished')) document.getElementById('kpiAIFinished').textContent = aiFinished;
+            if (document.getElementById('kpiAITriedTransfer')) document.getElementById('kpiAITriedTransfer').textContent = aiTriedTransfer;
+            if (document.getElementById('kpiTransferOK')) document.getElementById('kpiTransferOK').textContent = transferOK;
+            if (document.getElementById('kpiTransferFail')) document.getElementById('kpiTransferFail').textContent = transferFail;
+
+            renderTransferTable('transferOKBody', transferOKUnits, transferOK);
+            renderTransferTable('transferFailBody', transferFailUnits, transferFail);
+            renderNegativityChart(negativityCauses);
+
+            if (document.getElementById('kpiProfanityTotal')) document.getElementById('kpiProfanityTotal').textContent = profanityCount;
+            if (document.getElementById('profanityWordsList')) {
+                const wordsHtml = Object.entries(profanityDetected).map(([w, c]) => `<span class="profanity-highlight">${w} (${c})</span>`).join(' ') || 'Nenhuma palavra detectada';
+                document.getElementById('profanityWordsList').innerHTML = wordsHtml;
+            }
+            if (document.getElementById('profanityConversations')) {
+                document.getElementById('profanityConversations').innerHTML = profanityChats.length > 0 ? profanityChats.map(c => `<div>• ${c}</div>`).join('') : 'Nenhuma ocorrência';
+            }
+        }
+
+        function renderTransferTable(bodyId, unitsMap, total) {
+            const tbody = document.getElementById(bodyId);
+            if (!tbody) return;
+            if (total === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9ca3af;">Sem dados para exibir</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            const sorted = Object.entries(unitsMap).sort((a, b) => b[1] - a[1]);
+            sorted.forEach(([unit, count]) => {
+                const pct = Math.round((count / total) * 100);
+                html += `<tr><td><strong>${unit}</strong></td><td>${count}</td><td>${pct}%</td></tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderNegativityChart(causesMap) {
+            const container = document.getElementById('negChartContent');
+            if (!container) return;
+            
+            const entries = Object.entries(causesMap).sort((a, b) => b[1] - a[1]);
+            if (entries.length === 0) {
+                container.innerHTML = '<p style="color:#9ca3af; text-align:center;">Nenhum problema registrado.</p>';
+                return;
+            }
+            
+            const max = entries[0][1];
+            let html = '';
+            entries.forEach(([cause, count]) => {
+                const pct = Math.max(8, Math.round((count / max) * 100));
+                const color = count > (max * 0.7) ? '#dc2626' : (count > (max * 0.4) ? '#ea580c' : '#ca8a04');
+                html += `
+                    <div class="neg-chart-bar">
+                        <div class="neg-chart-label">${cause}</div>
+                        <div class="neg-chart-track">
+                            <div class="neg-chart-fill" style="width: ${pct}%; background-color: ${color};">${count}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
         }
 
         function formatPhoneNumber(phone) {
@@ -1278,6 +1728,21 @@
             if (document.getElementById('kpiSimilar')) document.getElementById('kpiSimilar').textContent = '0%';
             if (document.getElementById('kpiFechamento')) document.getElementById('kpiFechamento').textContent = '0%';
             if (document.getElementById('kpiEncerramento')) document.getElementById('kpiEncerramento').textContent = '0%';
+
+            if (document.getElementById('kpiWaitAI')) document.getElementById('kpiWaitAI').textContent = '0';
+            if (document.getElementById('kpiWaitSeller')) document.getElementById('kpiWaitSeller').textContent = '0';
+            if (document.getElementById('kpiAIFinished')) document.getElementById('kpiAIFinished').textContent = '0';
+            if (document.getElementById('kpiAITriedTransfer')) document.getElementById('kpiAITriedTransfer').textContent = '0';
+            if (document.getElementById('kpiTransferOK')) document.getElementById('kpiTransferOK').textContent = '0';
+            if (document.getElementById('kpiTransferFail')) document.getElementById('kpiTransferFail').textContent = '0';
+
+            if (document.getElementById('transferOKBody')) document.getElementById('transferOKBody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9ca3af;">Aguardando dados...</td></tr>';
+            if (document.getElementById('transferFailBody')) document.getElementById('transferFailBody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9ca3af;">Aguardando dados...</td></tr>';
+            if (document.getElementById('negChartContent')) document.getElementById('negChartContent').innerHTML = '<p style="color:#9ca3af; text-align:center;">Aguardando dados...</p>';
+            
+            if (document.getElementById('kpiProfanityTotal')) document.getElementById('kpiProfanityTotal').textContent = '0';
+            if (document.getElementById('profanityWordsList')) document.getElementById('profanityWordsList').innerHTML = 'Aguardando dados...';
+            if (document.getElementById('profanityConversations')) document.getElementById('profanityConversations').innerHTML = 'Aguardando dados...';
         }
 
         function showError(msg, details) {
