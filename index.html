@@ -674,16 +674,8 @@
                 <div class="kpi-label">Total Conversas</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-value" id="kpiActiveChats">0</div>
-                <div class="kpi-label">Ativas Agora</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-value" id="kpiWaiting">0</div>
-                <div class="kpi-label">Aguardando</div>
-            </div>
-            <div class="kpi-card">
                 <div class="kpi-value" id="kpiAgents">0</div>
-                <div class="kpi-label">Agentes Ativos</div>
+                <div class="kpi-label">Total de Agentes</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-value" id="kpiUpdated">--:--</div>
@@ -1517,23 +1509,9 @@
             const totalChats = chats?.length || 0;
             document.getElementById('kpiTotalChats').textContent = totalChats;
 
-            // Conversas ativas (não finalizadas)
-            const activeChats = chats?.filter(chat =>
-                chat.status !== 'FINISHED' &&
-                (!chat.customerSupportRequest || chat.customerSupportRequest.status !== 'FINISHED')
-            ).length || 0;
-            document.getElementById('kpiActiveChats').textContent = activeChats;
-
-            // Aguardando atendimento
-            const waitingChats = chats?.filter(chat =>
-                chat.status === 'TEAM' ||
-                (chat.customerSupportRequest && chat.customerSupportRequest.status === 'WAITING')
-            ).length || 0;
-            document.getElementById('kpiWaiting').textContent = waitingChats;
-
-            // Agentes ativos (com status ativo)
-            const activeAgents = agents?.filter(agent => agent.status === 'ativo').length || 0;
-            document.getElementById('kpiAgents').textContent = activeAgents;
+            // Agentes totais
+            const totalAgents = agents?.length || 0;
+            if (document.getElementById('kpiAgents')) document.getElementById('kpiAgents').textContent = totalAgents;
 
             // KPIs Qualitativos (Mock para a demonstração do Renato AI)
             let hot = 0, warm = 0, cold = 0, transbordo = 0;
@@ -1746,9 +1724,7 @@
 
         function resetKPIs() {
             document.getElementById('kpiTotalChats').textContent = '0';
-            document.getElementById('kpiActiveChats').textContent = '0';
-            document.getElementById('kpiWaiting').textContent = '0';
-            document.getElementById('kpiAgents').textContent = '0';
+            if (document.getElementById('kpiAgents')) document.getElementById('kpiAgents').textContent = '0';
             document.getElementById('kpiUpdated').textContent = '--:--';
 
             if (document.getElementById('kpiHot')) document.getElementById('kpiHot').textContent = '0';
