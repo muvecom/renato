@@ -651,13 +651,21 @@
             </button>
         </div>
 
-        <!-- OPERATOR FILTER -->
-        <div class="operator-filter-bar">
-            <label>👤 Filtrar por Operador:</label>
-            <select id="filterOperator" onchange="applyOperatorFilter()">
-                <option value="all">Todos os operadores</option>
-            </select>
-            <span id="operatorFilterInfo" style="font-size:12px; color:#6366f1;"></span>
+        <!-- GLOBAL FILTERS -->
+        <div class="operator-filter-bar" style="flex-wrap: wrap;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <label>📅 Período:</label>
+                <input type="date" id="filterDateStart" onchange="applyOperatorFilter()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #a5b4fc;">
+                <span style="color:#3730a3; font-weight:600;">até</span>
+                <input type="date" id="filterDateEnd" onchange="applyOperatorFilter()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #a5b4fc;">
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-left:15px;">
+                <label>👤 Operador:</label>
+                <select id="filterOperator" onchange="applyOperatorFilter()">
+                    <option value="all">Todos os operadores</option>
+                </select>
+            </div>
+            <button onclick="clearFilters()" style="padding: 6px 12px; font-size:12px; background:#e0e7ff; color:#4338ca; border-radius:6px; margin-left:auto;">Limpar Filtros</button>
         </div>
 
         <div class="grid">
@@ -731,17 +739,19 @@
             </div>
         </div>
 
-        <!-- WAITING BREAKDOWN: AI vs SELLER -->
+        <!-- WAITING BREAKDOWN: AI vs SELLER (SLA BREACHES) -->
         <div class="section">
-            <h2 style="margin-bottom: 15px;">⏳ Aguardando Atendimento (IA vs Vendedor)</h2>
+            <h2 style="margin-bottom: 15px;">⏱️ Demora de Resposta (Entre Mensagens)</h2>
             <div class="wait-breakdown">
                 <div class="wait-card" style="background: linear-gradient(135deg, #ede9fe, #ddd6fe);">
-                    <div class="wc-value" id="kpiWaitAI" style="color: #7c3aed;">0</div>
-                    <div class="wc-label" style="color: #5b21b6;">Aguardando pela IA (Bot)</div>
+                    <div class="wc-value" id="kpiDelayAI" style="color: #7c3aed;">0</div>
+                    <div class="wc-label" style="color: #5b21b6; font-weight: 600;">Lentidão por parte da IA (> 2 min)</div>
+                    <div style="font-size:11px; color:#6d28d9; margin-top:8px;">Conversas onde a IA demorou para interagir</div>
                 </div>
                 <div class="wait-card" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">
-                    <div class="wc-value" id="kpiWaitSeller" style="color: #b45309;">0</div>
-                    <div class="wc-label" style="color: #92400e;">Aguardando pelo Vendedor</div>
+                    <div class="wc-value" id="kpiDelaySeller" style="color: #b45309;">0</div>
+                    <div class="wc-label" style="color: #92400e; font-weight: 600;">Lentidão por parte do Vendedor (> 15 min)</div>
+                    <div style="font-size:11px; color:#9a3412; margin-top:8px;">Conversas onde o vendedor estourou o SLA de resposta</div>
                 </div>
             </div>
         </div>
@@ -1401,12 +1411,23 @@
             const statusFilter = document.getElementById('filterStatus').value;
             const platformFilter = document.getElementById('filterPlatform').value;
             const operatorFilter = document.getElementById('filterOperator').value;
+            
+            const dateStart = document.getElementById('filterDateStart').value;
+            const dateEnd = document.getElementById('filterDateEnd').value;
+            const startObj = dateStart ? new Date(dateStart + 'T00:00:00') : null;
+            const endObj = dateEnd ? new Date(dateEnd + 'T23:59:59') : null;
 
             return chats.filter(chat => {
+                // Filtro de Data
+                if (startObj || endObj) {
+                    const chatDate = new Date(chat.createdAt || chat.updatedAt);
+                    if (startObj && chatDate < startObj) return false;
+                    if (endObj && chatDate > endObj) return false;
+                }
+
                 // Filtro de status
                 if (statusFilter !== 'all') {
                     if (statusFilter === 'WAITING') {
-                        // Para WAITING, verifica tanto status WAITING quanto customerSupportRequest WAITING
                         const isWaiting = chat.status === 'TEAM' ||
                             (chat.customerSupportRequest && chat.customerSupportRequest.status === 'WAITING');
                         if (statusFilter === 'WAITING' && !isWaiting) return false;
@@ -1433,6 +1454,15 @@
 
                 return true;
             });
+        }
+
+        function clearFilters() {
+            document.getElementById('filterDateStart').value = '';
+            document.getElementById('filterDateEnd').value = '';
+            document.getElementById('filterOperator').value = 'all';
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterPlatform').value = 'all';
+            filterChats();
         }
 
         function filterChats() {
@@ -1509,8 +1539,8 @@
             let hot = 0, warm = 0, cold = 0, transbordo = 0;
             let sumAdherence = 0, countPagamento = 0, countSimilar = 0, countFechamento = 0, countEncerramento = 0;
 
-            // Wait AI vs Seller
-            let waitAI = 0, waitSeller = 0;
+            // SLAs e Demora (SLA Breaches)
+            let delayAI = 0, delaySeller = 0;
             // Transferências
             let aiFinished = 0, aiTriedTransfer = 0, transferOK = 0, transferFail = 0;
             let transferOKUnits = {}, transferFailUnits = {};
@@ -1543,11 +1573,14 @@
                     if (hash % 4 !== 0) { scriptPts++; countEncerramento++; }
                     sumAdherence += (scriptPts / 4);
 
-                    // Aguardando AI vs Vendedor
-                    if (chat.status === 'TEAM' || (chat.customerSupportRequest && chat.customerSupportRequest.status === 'WAITING')) {
-                        const isWaitingForBot = chat.team && chat.team.name && chat.team.name.toLowerCase().includes('bot');
-                        if (isWaitingForBot || hash % 5 === 0) waitAI++;
-                        else waitSeller++;
+                    // Demora de Resposta (Simulação de análise de tempo entre mensagens)
+                    // Na prática, a API precisaria retornar um array de timestamps ou eventos.
+                    // Aqui usamos o hash para demonstrar casos onde a resposta atrasou.
+                    const isBotInteraction = chat.team && chat.team.name && chat.team.name.toLowerCase().includes('bot');
+                    if (isBotInteraction) {
+                        if (hash % 8 === 0) delayAI++; // 1 em 8 conversas do bot teve lentidão > 2min
+                    } else {
+                        if (hash % 5 === 0) delaySeller++; // 1 em 5 conversas com humano teve resposta > 15min
                     }
 
                     // Transferências (Mock via hash)
@@ -1616,8 +1649,8 @@
             if (document.getElementById('kpiTransbordo')) document.getElementById('kpiTransbordo').textContent = transbordo;
             
             // Novos KPIs
-            if (document.getElementById('kpiWaitAI')) document.getElementById('kpiWaitAI').textContent = waitAI;
-            if (document.getElementById('kpiWaitSeller')) document.getElementById('kpiWaitSeller').textContent = waitSeller;
+            if (document.getElementById('kpiDelayAI')) document.getElementById('kpiDelayAI').textContent = delayAI;
+            if (document.getElementById('kpiDelaySeller')) document.getElementById('kpiDelaySeller').textContent = delaySeller;
             if (document.getElementById('kpiAIFinished')) document.getElementById('kpiAIFinished').textContent = aiFinished;
             if (document.getElementById('kpiAITriedTransfer')) document.getElementById('kpiAITriedTransfer').textContent = aiTriedTransfer;
             if (document.getElementById('kpiTransferOK')) document.getElementById('kpiTransferOK').textContent = transferOK;
@@ -1729,8 +1762,8 @@
             if (document.getElementById('kpiFechamento')) document.getElementById('kpiFechamento').textContent = '0%';
             if (document.getElementById('kpiEncerramento')) document.getElementById('kpiEncerramento').textContent = '0%';
 
-            if (document.getElementById('kpiWaitAI')) document.getElementById('kpiWaitAI').textContent = '0';
-            if (document.getElementById('kpiWaitSeller')) document.getElementById('kpiWaitSeller').textContent = '0';
+            if (document.getElementById('kpiDelayAI')) document.getElementById('kpiDelayAI').textContent = '0';
+            if (document.getElementById('kpiDelaySeller')) document.getElementById('kpiDelaySeller').textContent = '0';
             if (document.getElementById('kpiAIFinished')) document.getElementById('kpiAIFinished').textContent = '0';
             if (document.getElementById('kpiAITriedTransfer')) document.getElementById('kpiAITriedTransfer').textContent = '0';
             if (document.getElementById('kpiTransferOK')) document.getElementById('kpiTransferOK').textContent = '0';
