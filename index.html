@@ -2007,6 +2007,59 @@
         // IA DE BI (CHAT WIDGET)
         // ============================================================================
         function toggleBiBot() {
+            const w = document.getElementById('biBotWindow');
+            w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function handleBiBotKey(e) {
+            if (e.key === 'Enter') sendBiBotMessage();
+        }
+
+        function sendBiBotMessage() {
+            const input = document.getElementById('biBotInput');
+            const text = input.value.trim();
+            if (!text) return;
+            const msgs = document.getElementById('biBotMessages');
+
+            // User msg
+            const uMsg = document.createElement('div');
+            uMsg.className = 'bi-msg bi-msg-user';
+            uMsg.textContent = text;
+            msgs.appendChild(uMsg);
+            input.value = '';
+
+            // Scroll
+            msgs.scrollTop = msgs.scrollHeight;
+
+            // AI mock response
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'bi-msg bi-msg-ai';
+                aiMsg.innerHTML = getBiMockResponse(text);
+                msgs.appendChild(aiMsg);
+                msgs.scrollTop = msgs.scrollHeight;
+            }, 800);
+        }
+
+        function getBiMockResponse(q) {
+            const ql = q.toLowerCase();
+            if (ql.includes('quentes') || ql.includes('quente')) {
+                const hot = document.getElementById('kpiHot')?.textContent || 0;
+                return `Notei que temos **${hot} leads quentes** aguardando. Eles têm prioridade alta para fechamento!`;
+            } else if (ql.includes('transbordo') || ql.includes('transferência') || ql.includes('não transferidas')) {
+                const transb = document.getElementById('kpiTransbordo')?.textContent || 0;
+                return `No momento, há **${transb} ocorrências de não transferidas/transbordo humano**. Vale a pena verificar esses gargalos com os atendentes na fila.`;
+            } else if (ql.includes('agente') || ql.includes('atendente')) {
+                const agentes = document.getElementById('kpiAgents')?.textContent || 0;
+                return `Estamos operando com **${agentes} agentes ativos** integrados no sistema, processando filas.`;
+            } else {
+                return "Hum, não consegui encontrar dados específicos relacionados a isso na minha verificação atual. Pode tentar reformular de forma diferente, ou buscar por outras palavras em relação aos marcadores visuais do painel, por favor?";
+            }
+        }
+    </script>
+
+    <!-- IA de BI Widget HTML -->
+    <button class="bi-bot-btn" onclick="toggleBiBot()" title="Falar com a IA de BI">✨</button>
     <div class="bi-bot-window" id="biBotWindow">
         <div class="bi-bot-header">
             <span>✨ IA de BI</span>
