@@ -160,6 +160,13 @@
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .kpi-value {
@@ -452,14 +459,16 @@
             align-items: center;
             justify-content: center;
         }
+
         /* ===== NEW METRICS STYLES ===== */
         .metric-section {
             background: white;
             padding: 24px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
             margin: 20px 0;
         }
+
         .metric-section h3 {
             font-size: 16px;
             margin-bottom: 16px;
@@ -467,18 +476,21 @@
             align-items: center;
             gap: 8px;
         }
+
         .neg-chart-bar {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 10px;
         }
+
         .neg-chart-label {
             min-width: 180px;
             font-size: 13px;
             color: #374151;
             text-align: right;
         }
+
         .neg-chart-track {
             flex: 1;
             height: 26px;
@@ -487,6 +499,7 @@
             overflow: hidden;
             position: relative;
         }
+
         .neg-chart-fill {
             height: 100%;
             border-radius: 6px;
@@ -499,12 +512,14 @@
             transition: width 0.6s ease;
             min-width: 30px;
         }
+
         .neg-chart-count {
             min-width: 40px;
             font-size: 13px;
             font-weight: 700;
             color: #111827;
         }
+
         .profanity-highlight {
             background: linear-gradient(135deg, #fee2e2, #fecaca);
             border: 1px solid #fca5a5;
@@ -516,46 +531,55 @@
             display: inline-block;
             margin: 2px;
         }
+
         .profanity-summary {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
             align-items: center;
         }
+
         .profanity-total {
             font-size: 40px;
             font-weight: 800;
             color: #dc2626;
         }
+
         .transfer-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 16px;
         }
+
         .transfer-card {
             background: #f9fafb;
             border-radius: 10px;
             padding: 18px;
             border-left: 4px solid;
         }
+
         .transfer-card h4 {
             font-size: 14px;
             margin-bottom: 10px;
         }
+
         .transfer-card .tc-value {
             font-size: 28px;
             font-weight: 800;
         }
+
         .transfer-card .tc-label {
             font-size: 12px;
             color: #6b7280;
         }
+
         .unit-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
             margin-top: 12px;
         }
+
         .unit-table th {
             background: #f3f4f6;
             padding: 8px 12px;
@@ -563,31 +587,38 @@
             font-size: 12px;
             border-bottom: 1px solid #e5e7eb;
         }
+
         .unit-table td {
             padding: 8px 12px;
             border-bottom: 1px solid #f3f4f6;
         }
+
         .unit-table tr:hover {
             background: #f9fafb;
         }
+
         .wait-breakdown {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
+
         .wait-card {
             text-align: center;
             padding: 20px;
             border-radius: 10px;
         }
+
         .wait-card .wc-value {
             font-size: 36px;
             font-weight: 800;
         }
+
         .wait-card .wc-label {
             font-size: 13px;
             margin-top: 4px;
         }
+
         .operator-filter-bar {
             display: flex;
             align-items: center;
@@ -598,11 +629,13 @@
             margin-bottom: 20px;
             border: 1px solid #c7d2fe;
         }
+
         .operator-filter-bar label {
             font-weight: 600;
             font-size: 14px;
             color: #3730a3;
         }
+
         .operator-filter-bar select {
             padding: 8px 14px;
             border-radius: 8px;
@@ -611,13 +644,17 @@
             font-size: 14px;
             min-width: 220px;
         }
+
         .two-col-metrics {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
+
         @media (max-width: 768px) {
-            .two-col-metrics, .wait-breakdown {
+
+            .two-col-metrics,
+            .wait-breakdown {
                 grid-template-columns: 1fr;
             }
         }
@@ -655,9 +692,11 @@
         <div class="operator-filter-bar" style="flex-wrap: wrap;">
             <div style="display:flex; align-items:center; gap:8px;">
                 <label>📅 Período:</label>
-                <input type="date" id="filterDateStart" onchange="applyOperatorFilter()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #a5b4fc;">
+                <input type="date" id="filterDateStart" onchange="applyOperatorFilter()"
+                    style="padding: 6px 10px; border-radius: 6px; border: 1px solid #a5b4fc;">
                 <span style="color:#3730a3; font-weight:600;">até</span>
-                <input type="date" id="filterDateEnd" onchange="applyOperatorFilter()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #a5b4fc;">
+                <input type="date" id="filterDateEnd" onchange="applyOperatorFilter()"
+                    style="padding: 6px 10px; border-radius: 6px; border: 1px solid #a5b4fc;">
             </div>
             <div style="display:flex; align-items:center; gap:8px; margin-left:15px;">
                 <label>👤 Operador:</label>
@@ -665,11 +704,13 @@
                     <option value="all">Todos os operadores</option>
                 </select>
             </div>
-            <button onclick="clearFilters()" style="padding: 6px 12px; font-size:12px; background:#e0e7ff; color:#4338ca; border-radius:6px; margin-left:auto;">Limpar Filtros</button>
+            <button onclick="clearFilters()"
+                style="padding: 6px 12px; font-size:12px; background:#e0e7ff; color:#4338ca; border-radius:6px; margin-left:auto;">Limpar
+                Filtros</button>
         </div>
 
         <div class="grid">
-            <div class="kpi-card">
+            <div class="kpi-card" onclick="showDetailsModal('Total Conversas', kpiChatsMap.total)">
                 <div class="kpi-value" id="kpiTotalChats">0</div>
                 <div class="kpi-label">Total Conversas</div>
             </div>
@@ -686,21 +727,21 @@
         <div class="section">
             <h2 style="margin-bottom: 15px;">🧠 Qualificação Renato AI (Auto-Service)</h2>
             <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-top: 0;">
-                <div class="kpi-card" style="border-top: 4px solid #ef4444;">
+                <div class="kpi-card" style="border-top: 4px solid #ef4444;" onclick="showDetailsModal('Leads Quentes', kpiChatsMap.hot)">
                     <div class="kpi-value" id="kpiHot" style="color: #ef4444;">0</div>
                     <div class="kpi-label">Quentes 🔥</div>
                 </div>
-                <div class="kpi-card" style="border-top: 4px solid #f59e0b;">
+                <div class="kpi-card" style="border-top: 4px solid #f59e0b;" onclick="showDetailsModal('Leads Mornos', kpiChatsMap.warm)">
                     <div class="kpi-value" id="kpiWarm" style="color: #f59e0b;">0</div>
                     <div class="kpi-label">Mornos 💧</div>
                 </div>
-                <div class="kpi-card" style="border-top: 4px solid #3b82f6;">
+                <div class="kpi-card" style="border-top: 4px solid #3b82f6;" onclick="showDetailsModal('Leads Frios', kpiChatsMap.cold)">
                     <div class="kpi-value" id="kpiCold" style="color: #3b82f6;">0</div>
                     <div class="kpi-label">Frios 🧊</div>
                 </div>
-                <div class="kpi-card" style="border-top: 4px solid #8b5cf6;">
+                <div class="kpi-card" style="border-top: 4px solid #8b5cf6;" onclick="showDetailsModal('Não Transferidas', kpiChatsMap.nao_transferidas)">
                     <div class="kpi-value" id="kpiTransbordo" style="color: #8b5cf6;">0</div>
-                    <div class="kpi-label">Transbordo Humano</div>
+                    <div class="kpi-label">Não Transferidas</div>
                 </div>
             </div>
         </div>
@@ -737,13 +778,17 @@
             <div class="wait-breakdown">
                 <div class="wait-card" style="background: linear-gradient(135deg, #ede9fe, #ddd6fe);">
                     <div class="wc-value" id="kpiDelayAI" style="color: #7c3aed;">0</div>
-                    <div class="wc-label" style="color: #5b21b6; font-weight: 600;">Lentidão por parte da IA (> 2 min)</div>
-                    <div style="font-size:11px; color:#6d28d9; margin-top:8px;">Conversas onde a IA demorou para interagir</div>
+                    <div class="wc-label" style="color: #5b21b6; font-weight: 600;">Lentidão por parte da IA (> 2 min)
+                    </div>
+                    <div style="font-size:11px; color:#6d28d9; margin-top:8px;">Conversas onde a IA demorou para
+                        interagir</div>
                 </div>
                 <div class="wait-card" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">
                     <div class="wc-value" id="kpiDelaySeller" style="color: #b45309;">0</div>
-                    <div class="wc-label" style="color: #92400e; font-weight: 600;">Lentidão por parte do Vendedor (> 15 min)</div>
-                    <div style="font-size:11px; color:#9a3412; margin-top:8px;">Conversas onde o vendedor estourou o SLA de resposta</div>
+                    <div class="wc-label" style="color: #92400e; font-weight: 600;">Lentidão por parte do Vendedor (> 15
+                        min)</div>
+                    <div style="font-size:11px; color:#9a3412; margin-top:8px;">Conversas onde o vendedor estourou o SLA
+                        de resposta</div>
                 </div>
             </div>
         </div>
@@ -778,15 +823,35 @@
                 <div class="metric-section" style="margin:0; border-top: 3px solid #16a34a;">
                     <h3 style="color: #166534;">✅ Transferidos com Sucesso (por Unidade)</h3>
                     <table class="unit-table" id="transferOKTable">
-                        <thead><tr><th>Unidade</th><th>Qtd</th><th>%</th></tr></thead>
-                        <tbody id="transferOKBody"><tr><td colspan="3" style="text-align:center;color:#9ca3af;">Aguardando dados...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>Unidade</th>
+                                <th>Qtd</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transferOKBody">
+                            <tr>
+                                <td colspan="3" style="text-align:center;color:#9ca3af;">Aguardando dados...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
                 <div class="metric-section" style="margin:0; border-top: 3px solid #dc2626;">
                     <h3 style="color: #991b1b;">❌ Falha na Transferência (por Unidade)</h3>
                     <table class="unit-table" id="transferFailTable">
-                        <thead><tr><th>Unidade</th><th>Qtd</th><th>%</th></tr></thead>
-                        <tbody id="transferFailBody"><tr><td colspan="3" style="text-align:center;color:#9ca3af;">Aguardando dados...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>Unidade</th>
+                                <th>Qtd</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transferFailBody">
+                            <tr>
+                                <td colspan="3" style="text-align:center;color:#9ca3af;">Aguardando dados...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -796,7 +861,9 @@
         <div class="section">
             <h2 style="margin-bottom: 15px;">📉 Gráfico de Negativas (Problemas na Conversa)</h2>
             <div class="metric-section" id="negChartSection">
-                <div id="negChartContent"><p style="color:#9ca3af; text-align:center;">Aguardando dados...</p></div>
+                <div id="negChartContent">
+                    <p style="color:#9ca3af; text-align:center;">Aguardando dados...</p>
+                </div>
             </div>
         </div>
 
@@ -813,8 +880,10 @@
                         <h3 style="font-size:14px; color:#991b1b; margin-bottom:10px;">Palavras Detectadas:</h3>
                         <div id="profanityWordsList" style="color:#9ca3af; font-size:13px;">Aguardando dados...</div>
                         <div style="margin-top:12px;">
-                            <h3 style="font-size:14px; color:#374151; margin-bottom:8px;">Conversas com Ocorrências:</h3>
-                            <div id="profanityConversations" style="color:#9ca3af; font-size:13px;">Aguardando dados...</div>
+                            <h3 style="font-size:14px; color:#374151; margin-bottom:8px;">Conversas com Ocorrências:
+                            </h3>
+                            <div id="profanityConversations" style="color:#9ca3af; font-size:13px;">Aguardando dados...
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -831,11 +900,11 @@
             <table id="agentsTable" style="display:none;">
                 <thead>
                     <tr>
-                        <th>Nome</th>
-                        <th>Tipo</th>
+                        <th>Nome / Time</th>
                         <th>Status</th>
-                        <th>Email</th>
-                        <th>Criado em</th>
+                        <th>Total (Atribuídas)</th>
+                        <th>Atendidas</th>
+                        <th>Não Atendidas</th>
                     </tr>
                 </thead>
                 <tbody id="agentsTableBody"></tbody>
@@ -896,7 +965,7 @@
         // ============================================================================
         const CONFIG = {
             // URL do seu backend que consome a API OmniChat
-            OMNICHAT_API_URL: 'https://api.muvecom.com.br/v1/omnichat-chats',
+            OMNICHAT_API_URL: 'https://api.muvecom.com.br/v1/omnichat-chats?limit=2000&hours=+10',
             // Caso tenha endpoint específico para agentes (opcional)
             AGENTS_API_URL: 'https://api.muvecom.com.br/v1/omnichat-agents'
         };
@@ -975,7 +1044,7 @@
         async function fetchFromAPI(url) {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
-            
+
             let finalUrl = url;
             if (token) {
                 const separator = finalUrl.includes('?') ? '&' : '?';
@@ -1058,105 +1127,50 @@
         function extractAgentsFromData(chats, agentsInput) {
             const agentsMap = new Map();
 
-            // 1. Processa agentes do endpoint específico (se fornecido)
-            if (Array.isArray(agentsInput) && agentsInput.length > 0) {
-                agentsInput.forEach(agent => {
-                    if (agent.objectId) {
-                        agentsMap.set(agent.objectId, {
-                            id: agent.objectId,
-                            name: agent.name || 'Agente',
-                            lastName: agent.lastName || '',
-                            email: agent.email || '--',
-                            picture: agent.picture,
-                            type: 'agente',
-                            status: agent.disabled === false ? 'ativo' : (agent.disabled === true ? 'inativo' : 'ativo'),
-                            createdAt: agent.createdAt,
-                            source: 'endpoint'
-                        });
-                    }
-                });
-            }
-
-            // 2. Extrai dos usuários nas conversas
+            // Focamos na extração apenas a partir das conversas ativas
             chats.forEach(chat => {
+                let agentId = null;
+                let teamName = chat.team && chat.team.name ? chat.team.name : '--';
+                
+                // Verifica se há um usuário/agente atribuído
                 if (chat.user && chat.user.objectId) {
-                    const agentId = chat.user.objectId;
+                    agentId = chat.user.objectId;
                     if (!agentsMap.has(agentId)) {
                         agentsMap.set(agentId, {
                             id: agentId,
                             name: chat.user.name || 'Sem nome',
                             lastName: chat.user.lastName || '',
-                            email: chat.user.email || '--',
-                            picture: chat.user.picture,
                             type: 'atendente',
-                            status: chat.user.disabled === false ? 'ativo' : (chat.user.disabled === true ? 'inativo' : 'ativo'),
-                            lastActivity: chat.updatedAt,
-                            createdAt: chat.user.createdAt || chat.createdAt,
-                            source: 'chat_user'
+                            status: chat.user.disabled === false ? 'ativo' : 'inativo',
+                            team: teamName,
+                            total: 0,
+                            atendidas: 0,
+                            naoAtendidas: 0,
+                            chats: []
                         });
                     }
                 }
 
-                // 3. Extrai do customerSupportRequest
-                if (chat.customerSupportRequest) {
-                    const csr = chat.customerSupportRequest;
-                    if (csr.contactedBy && csr.contactedBy.objectId) {
-                        const agentId = csr.contactedBy.objectId;
-                        if (!agentsMap.has(agentId)) {
-                            agentsMap.set(agentId, {
-                                id: agentId,
-                                name: csr.contactedBy.name || 'Atendente',
-                                lastName: csr.contactedBy.lastName || '',
-                                email: '--',
-                                type: 'contatado_por',
-                                status: 'ativo',
-                                lastActivity: csr.updatedAt,
-                                createdAt: chat.createdAt,
-                                source: 'csr_contactedBy'
-                            });
-                        }
+                if (agentId) {
+                    const agent = agentsMap.get(agentId);
+                    agent.total++;
+                    agent.chats.push(chat);
+                    
+                    // Considera 'Atendida' se o status for FINISHED ou USER
+                    if (chat.status === 'FINISHED' || chat.status === 'USER') {
+                        agent.atendidas++;
+                    } else {
+                        agent.naoAtendidas++;
                     }
-
-                    // 4. Participating Users
-                    if (csr.participatingUsers && Array.isArray(csr.participatingUsers)) {
-                        csr.participatingUsers.forEach(user => {
-                            if (user.objectId && !agentsMap.has(user.objectId)) {
-                                agentsMap.set(user.objectId, {
-                                    id: user.objectId,
-                                    name: user.name || 'Participante',
-                                    lastName: user.lastName || '',
-                                    email: '--',
-                                    type: 'participante',
-                                    status: 'ativo',
-                                    createdAt: chat.createdAt,
-                                    source: 'csr_participating'
-                                });
-                            }
-                        });
+                    
+                    if (agent.team === '--' && teamName !== '--') {
+                        agent.team = teamName;
                     }
-                }
-
-                // 5. Equipe
-                if (chat.team && chat.team.users) {
-                    chat.team.users.forEach(user => {
-                        if (user.objectId && !agentsMap.has(user.objectId)) {
-                            agentsMap.set(user.objectId, {
-                                id: user.objectId,
-                                name: user.name || 'Membro da Equipe',
-                                lastName: user.lastName || '',
-                                email: '--',
-                                type: 'equipe',
-                                status: 'ativo',
-                                createdAt: chat.team.createdAt || chat.createdAt,
-                                source: 'team_member'
-                            });
-                        }
-                    });
                 }
             });
 
-            // Converte para array e ordena por nome
-            const agentsArray = Array.from(agentsMap.values());
+            // Retorna apenas atendentes com ao menos 1 atendimento, ordenados por nome
+            const agentsArray = Array.from(agentsMap.values()).filter(a => a.total > 0);
             agentsArray.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
             return agentsArray;
@@ -1183,43 +1197,33 @@
 
             agents.forEach(agent => {
                 const row = document.createElement('tr');
-
-                // Status badge
                 const statusClass = agent.status === 'ativo' ? 'badge-success' : 'badge-danger';
                 const statusText = agent.status === 'ativo' ? 'Ativo' : 'Inativo';
-
-                // Tipo badge
-                let typeBadge = '';
-                if (agent.type === 'agente' || agent.type === 'atendente') {
-                    typeBadge = '<span class="badge badge-info">Atendente</span>';
-                } else if (agent.type === 'equipe') {
-                    typeBadge = '<span class="badge" style="background:#f3e8ff;color:#7c3aed;">Equipe</span>';
-                } else {
-                    typeBadge = `<span class="badge" style="background:#f0f9ff;color:#0369a1;">${agent.type}</span>`;
-                }
-
-                // Data formatada
-                const created = agent.createdAt ?
-                    new Date(agent.createdAt).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    }) : '--';
-
-                // Nome completo
                 const fullName = `${agent.name || ''} ${agent.lastName || ''}`.trim() || 'Sem nome';
 
                 row.innerHTML = `
-                    <td class="agent-name">${fullName}</td>
-                    <td>${typeBadge}</td>
+                    <td>
+                        <div class="agent-name">${fullName}</div>
+                        <div style="font-size:11px; color:var(--gray); margin-top:2px; font-weight:600;">Time: ${agent.team}</div>
+                    </td>
                     <td><span class="badge ${statusClass}">${statusText}</span></td>
-                    <td>${agent.email || '--'}</td>
-                    <td>${created}</td>
+                    <td style="font-weight:bold; font-size:16px;">${agent.total}</td>
+                    <td style="color:var(--success); font-weight:bold; font-size:16px;">${agent.atendidas}</td>
+                    <td>
+                        <button onclick="showAgentChats('${agent.id}', '${fullName}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:6px 12px; border-radius:12px; font-weight:bold; cursor:pointer; transition: opacity 0.2s;">
+                            ${agent.naoAtendidas} 🔍
+                        </button>
+                    </td>
                 `;
                 tbody.appendChild(row);
             });
 
             table.style.display = 'table';
+        }
+
+        function showAgentChats(agentId, agentName) {
+            const agentChats = allChats.filter(c => c.user && c.user.objectId === agentId && c.status !== 'FINISHED' && c.status !== 'USER');
+            showDetailsModal(`Não Atendidas - ${agentName}`, agentChats);
         }
 
         function renderChatsTable(chats) {
@@ -1362,6 +1366,10 @@
                         minute: '2-digit'
                     }) : '--';
 
+                // Link para OmniChat
+                const contactId = chat.contactId || (chat.customer && chat.customer.objectId) || chat.objectId;
+                const chatLink = contactId ? `https://app.omni.chat/#/home/chat/${contactId}` : '#';
+
                 row.innerHTML = `
                     <td>
                         <div class="customer-name">${customerName || 'Cliente'}</div>
@@ -1390,7 +1398,13 @@
                         <div style="margin-top: 4px; font-size: 11px;">Agente: ${agentInfo}</div>
                         ${transbordoBadge}
                     </td>
-                    <td style="white-space:nowrap; font-size: 13px;">${createdAt}</td>
+                    <td style="white-space:nowrap; font-size: 13px;">
+                        ${createdAt}
+                        <br>
+                        <a href="${chatLink}" target="_blank" style="display:inline-block; margin-top:8px; padding:6px 12px; background:var(--primary); color:white; border-radius:6px; text-decoration:none; font-size:11px; font-weight:600; transition:opacity 0.2s;">
+                            💬 Ver Conversa
+                        </a>
+                    </td>
                 `;
 
                 tbody.appendChild(row);
@@ -1403,7 +1417,7 @@
             const statusFilter = document.getElementById('filterStatus').value;
             const platformFilter = document.getElementById('filterPlatform').value;
             const operatorFilter = document.getElementById('filterOperator').value;
-            
+
             const dateStart = document.getElementById('filterDateStart').value;
             const dateEnd = document.getElementById('filterDateEnd').value;
             const startObj = dateStart ? new Date(dateStart + 'T00:00:00') : null;
@@ -1468,9 +1482,9 @@
         function populateOperatorFilter(chats) {
             const select = document.getElementById('filterOperator');
             const currentValue = select.value;
-            
+
             select.innerHTML = '<option value="all">Todos os operadores</option>';
-            
+
             const opsMap = new Map();
             chats.forEach(chat => {
                 let id = null, name = null;
@@ -1483,7 +1497,7 @@
                 }
                 if (id && !opsMap.has(id)) opsMap.set(id, name);
             });
-            
+
             const sortedOps = Array.from(opsMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
             sortedOps.forEach(([id, name]) => {
                 const opt = document.createElement('option');
@@ -1491,7 +1505,7 @@
                 opt.textContent = name;
                 select.appendChild(opt);
             });
-            
+
             if (opsMap.has(currentValue)) {
                 select.value = currentValue;
             }
@@ -1504,7 +1518,11 @@
         // ============================================================================
         // FUNÇÕES AUXILIARES
         // ============================================================================
+        let kpiChatsMap = { total: [], actives: [], waiting: [], hot: [], warm: [], cold: [], transbordo: [], nao_transferidas: [] };
+
         function updateKPIs(chats, agents) {
+            kpiChatsMap = { total: [], actives: [], waiting: [], hot: [], warm: [], cold: [], transbordo: [], nao_transferidas: [] };
+
             // Total de conversas
             const totalChats = chats?.length || 0;
             document.getElementById('kpiTotalChats').textContent = totalChats;
@@ -1514,7 +1532,7 @@
             if (document.getElementById('kpiAgents')) document.getElementById('kpiAgents').textContent = totalAgents;
 
             // KPIs Qualitativos (Mock para a demonstração do Renato AI)
-            let hot = 0, warm = 0, cold = 0, transbordo = 0;
+            let hot = 0, warm = 0, cold = 0, nao_transferidas_count = 0;
             let sumAdherence = 0, countPagamento = 0, countSimilar = 0, countFechamento = 0, countEncerramento = 0;
 
             // SLAs e Demora (SLA Breaches)
@@ -1532,16 +1550,25 @@
 
             if (chats && chats.length > 0) {
                 chats.forEach(chat => {
+                    kpiChatsMap.total.push(chat);
+
                     const hash = chat.objectId ? chat.objectId.charCodeAt(0) + (chat.objectId.charCodeAt(chat.objectId.length - 1) || 0) : Math.floor(Math.random() * 100);
 
                     const isHot = hash % 3 === 0;
                     const isWarm = hash % 3 === 1;
 
-                    if (isHot) hot++;
-                    else if (isWarm) warm++;
-                    else cold++;
+                    if (isHot) { hot++; kpiChatsMap.hot.push(chat); }
+                    else if (isWarm) { warm++; kpiChatsMap.warm.push(chat); }
+                    else { cold++; kpiChatsMap.cold.push(chat); }
 
-                    if (hash % 4 === 0) transbordo++;
+                    // Transbordo Logic -> "Não transferidas"
+                    const isTransbordo = hash % 4 === 0;
+                    if (isTransbordo) {
+                        kpiChatsMap.transbordo.push(chat);
+                    } else {
+                        nao_transferidas_count++;
+                        kpiChatsMap.nao_transferidas.push(chat);
+                    }
 
                     // Aderência ao Script Logic
                     let scriptPts = 0;
@@ -1624,8 +1651,8 @@
             if (document.getElementById('kpiHot')) document.getElementById('kpiHot').textContent = hot;
             if (document.getElementById('kpiWarm')) document.getElementById('kpiWarm').textContent = warm;
             if (document.getElementById('kpiCold')) document.getElementById('kpiCold').textContent = cold;
-            if (document.getElementById('kpiTransbordo')) document.getElementById('kpiTransbordo').textContent = transbordo;
-            
+            if (document.getElementById('kpiTransbordo')) document.getElementById('kpiTransbordo').textContent = nao_transferidas_count;
+
             // Novos KPIs
             if (document.getElementById('kpiDelayAI')) document.getElementById('kpiDelayAI').textContent = delayAI;
             if (document.getElementById('kpiDelaySeller')) document.getElementById('kpiDelaySeller').textContent = delaySeller;
@@ -1655,7 +1682,7 @@
                 tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9ca3af;">Sem dados para exibir</td></tr>';
                 return;
             }
-            
+
             let html = '';
             const sorted = Object.entries(unitsMap).sort((a, b) => b[1] - a[1]);
             sorted.forEach(([unit, count]) => {
@@ -1668,13 +1695,13 @@
         function renderNegativityChart(causesMap) {
             const container = document.getElementById('negChartContent');
             if (!container) return;
-            
+
             const entries = Object.entries(causesMap).sort((a, b) => b[1] - a[1]);
             if (entries.length === 0) {
                 container.innerHTML = '<p style="color:#9ca3af; text-align:center;">Nenhum problema registrado.</p>';
                 return;
             }
-            
+
             const max = entries[0][1];
             let html = '';
             entries.forEach(([cause, count]) => {
@@ -1748,7 +1775,7 @@
             if (document.getElementById('transferOKBody')) document.getElementById('transferOKBody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9ca3af;">Aguardando dados...</td></tr>';
             if (document.getElementById('transferFailBody')) document.getElementById('transferFailBody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9ca3af;">Aguardando dados...</td></tr>';
             if (document.getElementById('negChartContent')) document.getElementById('negChartContent').innerHTML = '<p style="color:#9ca3af; text-align:center;">Aguardando dados...</p>';
-            
+
             if (document.getElementById('kpiProfanityTotal')) document.getElementById('kpiProfanityTotal').textContent = '0';
             if (document.getElementById('profanityWordsList')) document.getElementById('profanityWordsList').innerHTML = 'Aguardando dados...';
             if (document.getElementById('profanityConversations')) document.getElementById('profanityConversations').innerHTML = 'Aguardando dados...';
@@ -1901,8 +1928,85 @@
         }
     </script>
 
-    <!-- IA de BI Widget HTML -->
-    <button class="bi-bot-btn" onclick="toggleBiBot()" title="Falar com a IA de BI">✨</button>
+        // ============================================================================
+        // MODAL DE DETALHES DE CHATS
+        // ============================================================================
+        function showDetailsModal(title, chatsArr) {
+            let modal = document.getElementById('detailsModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'detailsModal';
+                modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center;';
+                modal.innerHTML = `
+                    <div style="background:white; width:90%; max-width:1000px; max-height:80vh; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+                        <div style="padding:15px 20px; background:var(--primary); color:white; display:flex; justify-content:space-between; align-items:center;">
+                            <h3 id="detailsModalTitle" style="margin:0; font-size:18px;">Detalhes</h3>
+                            <button onclick="document.getElementById('detailsModal').style.display='none'" style="background:none; border:none; color:white; font-size:24px; cursor:pointer; line-height:1;">&times;</button>
+                        </div>
+                        <div style="padding:0; overflow-y:auto; flex:1;">
+                            <table style="width:100%; border-collapse:collapse; margin-top:0; box-shadow:none;">
+                                <thead style="position:sticky; top:0; background:#f9fafb; z-index:1;">
+                                    <tr>
+                                        <th style="padding:12px 20px; border-bottom:2px solid #eee; text-align:left;">Cliente</th>
+                                        <th style="padding:12px 20px; border-bottom:2px solid #eee; text-align:left;">Status / Time</th>
+                                        <th style="padding:12px 20px; border-bottom:2px solid #eee; text-align:left;">Última Mensagem</th>
+                                        <th style="padding:12px 20px; border-bottom:2px solid #eee; text-align:center;">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detailsModalContent"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            document.getElementById('detailsModalTitle').textContent = `${title} (${chatsArr.length})`;
+            const tbody = document.getElementById('detailsModalContent');
+            tbody.innerHTML = '';
+            
+            if (!chatsArr || chatsArr.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray);">Nenhuma conversa encontrada</td></tr>';
+            } else {
+                chatsArr.forEach(chat => {
+                    const customerName = chat.customer ? `${chat.customer.name || ''} ${chat.customer.lastName || ''}`.trim() : chat.name || 'Cliente';
+                    let lastMsg = '--';
+                    if (chat.lastMessage) {
+                        lastMsg = chat.lastMessage.text || (chat.lastMessage.type === 'ROUTING' ? 'Encaminhamento' : chat.lastMessage.type);
+                    }
+                    const contactId = chat.contactId || (chat.customer && chat.customer.objectId) || chat.objectId;
+                    
+                    let statusBadge = '';
+                    if (chat.status === 'FINISHED') statusBadge = '<span class="badge badge-danger">Finalizada</span>';
+                    else if (chat.status === 'USER') statusBadge = '<span class="badge badge-success">Em Atendimento</span>';
+                    else if (chat.status === 'TEAM') statusBadge = '<span class="badge badge-warning">Na Equipe</span>';
+                    else statusBadge = '<span class="badge" style="background:#f3f4f6;color:#6b7280;">Aguardando</span>';
+
+                    const teamName = chat.team && chat.team.name ? chat.team.name : '--';
+                    
+                    tbody.innerHTML += `
+                        <tr class="chat-row">
+                            <td style="padding:12px 20px; border-bottom:1px solid #f3f4f6; font-weight:600; color:#111827;">${customerName}</td>
+                            <td style="padding:12px 20px; border-bottom:1px solid #f3f4f6;">
+                                <div>${statusBadge}</div>
+                                ${teamName !== '--' ? `<div style="font-size:11px; margin-top:4px; color:var(--gray);">Time: ${teamName}</div>` : ''}
+                            </td>
+                            <td style="padding:12px 20px; border-bottom:1px solid #f3f4f6; font-size:13px; color:#4b5563; line-height:1.4;">${truncateText(lastMsg, 80)}</td>
+                            <td style="padding:12px 20px; border-bottom:1px solid #f3f4f6; text-align:center;">
+                                <a href="https://app.omni.chat/#/home/chat/${contactId}" target="_blank" style="padding:6px 12px; background:var(--primary); color:white; text-decoration:none; border-radius:6px; font-size:12px; font-weight:600; display:inline-block; transition:opacity 0.2s;">💬 Ver</a>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        // ============================================================================
+        // IA DE BI (CHAT WIDGET)
+        // ============================================================================
+        function toggleBiBot() {
     <div class="bi-bot-window" id="biBotWindow">
         <div class="bi-bot-header">
             <span>✨ IA de BI</span>
