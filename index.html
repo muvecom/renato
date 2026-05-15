@@ -727,19 +727,23 @@
         <div class="section">
             <h2 style="margin-bottom: 15px;">🧠 Qualificação Renato AI (Auto-Service)</h2>
             <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-top: 0;">
-                <div class="kpi-card" style="border-top: 4px solid #ef4444;" onclick="showDetailsModal('Leads Quentes', kpiChatsMap.hot)">
+                <div class="kpi-card" style="border-top: 4px solid #ef4444;"
+                    onclick="showDetailsModal('Leads Quentes', kpiChatsMap.hot)">
                     <div class="kpi-value" id="kpiHot" style="color: #ef4444;">0</div>
                     <div class="kpi-label">Quentes 🔥</div>
                 </div>
-                <div class="kpi-card" style="border-top: 4px solid #f59e0b;" onclick="showDetailsModal('Leads Mornos', kpiChatsMap.warm)">
+                <div class="kpi-card" style="border-top: 4px solid #f59e0b;"
+                    onclick="showDetailsModal('Leads Mornos', kpiChatsMap.warm)">
                     <div class="kpi-value" id="kpiWarm" style="color: #f59e0b;">0</div>
                     <div class="kpi-label">Mornos 💧</div>
                 </div>
-                <div class="kpi-card" style="border-top: 4px solid #3b82f6;" onclick="showDetailsModal('Leads Frios', kpiChatsMap.cold)">
+                <div class="kpi-card" style="border-top: 4px solid #3b82f6;"
+                    onclick="showDetailsModal('Leads Frios', kpiChatsMap.cold)">
                     <div class="kpi-value" id="kpiCold" style="color: #3b82f6;">0</div>
                     <div class="kpi-label">Frios 🧊</div>
                 </div>
-                <div class="kpi-card" style="border-top: 4px solid #8b5cf6;" onclick="showDetailsModal('Não Transferidas', kpiChatsMap.nao_transferidas)">
+                <div class="kpi-card" style="border-top: 4px solid #8b5cf6;"
+                    onclick="showDetailsModal('Não Transferidas', kpiChatsMap.nao_transferidas)">
                     <div class="kpi-value" id="kpiTransbordo" style="color: #8b5cf6;">0</div>
                     <div class="kpi-label">Não Transferidas</div>
                 </div>
@@ -1131,7 +1135,7 @@
             chats.forEach(chat => {
                 let agentId = null;
                 let teamName = chat.team && chat.team.name ? chat.team.name : '--';
-                
+
                 // Verifica se há um usuário/agente atribuído
                 if (chat.user && chat.user.objectId) {
                     agentId = chat.user.objectId;
@@ -1155,14 +1159,14 @@
                     const agent = agentsMap.get(agentId);
                     agent.total++;
                     agent.chats.push(chat);
-                    
+
                     // Considera 'Atendida' se o status for FINISHED ou USER
                     if (chat.status === 'FINISHED' || chat.status === 'USER') {
                         agent.atendidas++;
                     } else {
                         agent.naoAtendidas++;
                     }
-                    
+
                     if (agent.team === '--' && teamName !== '--') {
                         agent.team = teamName;
                     }
@@ -1957,11 +1961,11 @@
                 `;
                 document.body.appendChild(modal);
             }
-            
+
             document.getElementById('detailsModalTitle').textContent = `${title} (${chatsArr.length})`;
             const tbody = document.getElementById('detailsModalContent');
             tbody.innerHTML = '';
-            
+
             if (!chatsArr || chatsArr.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray);">Nenhuma conversa encontrada</td></tr>';
             } else {
@@ -1972,7 +1976,7 @@
                         lastMsg = chat.lastMessage.text || (chat.lastMessage.type === 'ROUTING' ? 'Encaminhamento' : chat.lastMessage.type);
                     }
                     const contactId = chat.contactId || (chat.customer && chat.customer.objectId) || chat.objectId;
-                    
+
                     let statusBadge = '';
                     if (chat.status === 'FINISHED') statusBadge = '<span class="badge badge-danger">Finalizada</span>';
                     else if (chat.status === 'USER') statusBadge = '<span class="badge badge-success">Em Atendimento</span>';
@@ -1980,7 +1984,7 @@
                     else statusBadge = '<span class="badge" style="background:#f3f4f6;color:#6b7280;">Aguardando</span>';
 
                     const teamName = chat.team && chat.team.name ? chat.team.name : '--';
-                    
+
                     tbody.innerHTML += `
                         <tr class="chat-row">
                             <td style="padding:12px 20px; border-bottom:1px solid #f3f4f6; font-weight:600; color:#111827;">${customerName}</td>
@@ -1996,7 +2000,7 @@
                     `;
                 });
             }
-            
+
             modal.style.display = 'flex';
         }
 
