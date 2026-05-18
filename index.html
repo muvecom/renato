@@ -806,11 +806,6 @@
                     <div class="tc-value" id="kpiAIFinished" style="color: #10b981;">0</div>
                     <div class="tc-label">Contatos que a IA concluiu sem transbordo</div>
                 </div>
-                <div class="transfer-card" style="border-color: #8b5cf6;">
-                    <h4 style="color: #5b21b6;">📤 Tentou Transferir</h4>
-                    <div class="tc-value" id="kpiAITriedTransfer" style="color: #8b5cf6;">0</div>
-                    <div class="tc-label">Contatos que a IA tentou transferir</div>
-                </div>
                 <div class="transfer-card" style="border-color: #16a34a;">
                     <h4 style="color: #166534;">✅ Transferiu com Sucesso</h4>
                     <div class="tc-value" id="kpiTransferOK" style="color: #16a34a;">0</div>
@@ -1697,7 +1692,6 @@
             if (document.getElementById('kpiDelayAI')) document.getElementById('kpiDelayAI').textContent = delayAI;
             if (document.getElementById('kpiDelaySeller')) document.getElementById('kpiDelaySeller').textContent = delaySeller;
             if (document.getElementById('kpiAIFinished')) document.getElementById('kpiAIFinished').textContent = aiFinished;
-            if (document.getElementById('kpiAITriedTransfer')) document.getElementById('kpiAITriedTransfer').textContent = aiTriedTransfer;
             if (document.getElementById('kpiTransferOK')) document.getElementById('kpiTransferOK').textContent = transferOK;
             if (document.getElementById('kpiTransferFail')) document.getElementById('kpiTransferFail').textContent = transferFail;
 
@@ -1805,7 +1799,6 @@
             if (document.getElementById('kpiDelayAI')) document.getElementById('kpiDelayAI').textContent = '0';
             if (document.getElementById('kpiDelaySeller')) document.getElementById('kpiDelaySeller').textContent = '0';
             if (document.getElementById('kpiAIFinished')) document.getElementById('kpiAIFinished').textContent = '0';
-            if (document.getElementById('kpiAITriedTransfer')) document.getElementById('kpiAITriedTransfer').textContent = '0';
             if (document.getElementById('kpiTransferOK')) document.getElementById('kpiTransferOK').textContent = '0';
             if (document.getElementById('kpiTransferFail')) document.getElementById('kpiTransferFail').textContent = '0';
 
