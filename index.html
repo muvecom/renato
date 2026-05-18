@@ -1144,8 +1144,8 @@
                 let teamName = '--';
                 if (chat.team && chat.team.name) {
                     teamName = chat.team.name;
-                } else if (chat.customerSupportRequest && chat.customerSupportRequest.team && chat.customerSupportRequest.team.name) {
-                    teamName = chat.customerSupportRequest.team.name;
+                } else if (chat.customerSupportRequest && chat.customerSupportRequest.teamId) {
+                    teamName = chat.customerSupportRequest.teamId;
                 }
 
                 // Verifica se há um usuário/agente atribuído
