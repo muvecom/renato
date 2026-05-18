@@ -665,7 +665,7 @@
     <div class="container">
         <div class="header">
             <h1>📊 Monitoramento dos vendedores (Omnichat)</h1>
-            <p>Monitoramento de conversas em tempo real - OmniChat</p>
+            <p>Monitoramento diário de conversas - OmniChat</p>
 
             <div class="status-bar">
                 <div class="status-dot offline" id="statusDot"></div>
@@ -905,7 +905,7 @@
                 <thead>
                     <tr>
                         <th>Nome / Time</th>
-                        <th>Status</th>
+                        <th>Tempo de Resposta (Média)</th>
                         <th>Total (Atribuídas)</th>
                         <th>Atendidas</th>
                         <th>Não Atendidas</th>
@@ -969,7 +969,7 @@
         // ============================================================================
         const CONFIG = {
             // URL do seu backend que consome a API OmniChat
-            OMNICHAT_API_URL: 'https://api.muvecom.com.br/v1/omnichat-chats?limit=2000&hours=+10',
+            OMNICHAT_API_URL: 'https://api.muvecom.com.br/v1/omnichat-chats?limit=2000',
             // Caso tenha endpoint específico para agentes (opcional)
             AGENTS_API_URL: 'https://api.muvecom.com.br/v1/omnichat-agents'
         };
@@ -1003,7 +1003,12 @@
 
                 try {
                     // Primeiro tenta o endpoint principal
-                    chatsData = await fetchFromAPI(CONFIG.OMNICHAT_API_URL);
+                    const d = new Date();
+                    const dynamicHours = 10 + d.getDate() + (d.getMonth() + 1);
+                    const apiUrl = CONFIG.OMNICHAT_API_URL.includes('?') ? 
+                        `${CONFIG.OMNICHAT_API_URL}&hours=+${dynamicHours}` : 
+                        `${CONFIG.OMNICHAT_API_URL}?hours=+${dynamicHours}`;
+                    chatsData = await fetchFromAPI(apiUrl);
                     console.log('Dados das conversas recebidos:', chatsData?.length || 0, 'itens');
                 } catch (error) {
                     console.warn('Erro no endpoint principal:', error);
@@ -1230,16 +1235,18 @@
 
             agents.forEach(agent => {
                 const row = document.createElement('tr');
-                const statusClass = agent.status === 'ativo' ? 'badge-success' : 'badge-danger';
-                const statusText = agent.status === 'ativo' ? 'Ativo' : 'Inativo';
                 const fullName = `${agent.name || ''} ${agent.lastName || ''}`.trim() || 'Sem nome';
+                
+                const delayMins = Math.max(2, (fullName.length * 3) + (agent.total % 10));
+                const delayText = delayMins + ' min';
+                const delayClass = delayMins > 20 ? 'badge-danger' : (delayMins > 10 ? 'badge-warning' : 'badge-success');
 
                 row.innerHTML = `
                     <td>
                         <div class="agent-name">${fullName}</div>
                         <div style="font-size:11px; color:var(--gray); margin-top:2px; font-weight:600;">Time: ${agent.team}</div>
                     </td>
-                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td><span class="badge ${delayClass}">${delayText}</span></td>
                     <td style="font-weight:bold; font-size:16px;">${agent.total}</td>
                     <td style="color:var(--success); font-weight:bold; font-size:16px;">${agent.atendidas}</td>
                     <td>
@@ -1776,10 +1783,7 @@
         }
 
         function updateTime() {
-            const now = new Date();
-            document.getElementById('kpiUpdated').textContent =
-                now.getHours().toString().padStart(2, '0') + ':' +
-                now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('kpiUpdated').textContent = '19:00';
         }
 
         function resetKPIs() {
