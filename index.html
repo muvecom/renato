@@ -658,6 +658,147 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .productivity-wrap {
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .productivity-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 720px;
+        }
+
+        .productivity-table th,
+        .productivity-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f3f4f6;
+            text-align: left;
+        }
+
+        .productivity-table th {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #374151;
+            position: sticky;
+            top: 0;
+        }
+
+        .productivity-table th:first-child,
+        .productivity-table td:first-child {
+            position: sticky;
+            left: 0;
+            background: inherit;
+            z-index: 1;
+        }
+
+        .productivity-table tr.row-zero td {
+            color: #9ca3af;
+        }
+
+        .productivity-table tbody tr.is-selectable {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .productivity-table tbody tr.is-selectable:hover {
+            background: #eef2ff;
+        }
+
+        .productivity-table tbody tr.is-active td {
+            background: #e0e7ff;
+            box-shadow: inset 3px 0 0 var(--primary);
+        }
+
+        .productivity-table tbody tr.row-all td {
+            background: #f3f4f6;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .productivity-table tbody tr.row-all.is-active td {
+            background: #1f2937;
+            color: white;
+            box-shadow: inset 3px 0 0 #facc15;
+        }
+
+        .productivity-table .fail-link {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .productivity-table .fail-link:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        .table-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .table-pagination-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .table-pagination button {
+            padding: 6px 14px;
+            font-size: 13px;
+            background: #e0e7ff;
+            color: #4338ca;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .table-pagination button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .legend-panel {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #374151;
+        }
+
+        .legend-panel summary {
+            font-weight: 700;
+            cursor: pointer;
+            color: #1e40af;
+        }
+
+        .legend-panel ul {
+            margin: 10px 0 0 18px;
+        }
+
     </style>
 </head>
 
@@ -709,6 +850,33 @@
                 Filtros</button>
         </div>
 
+        <div class="section" id="productivitySection" style="display:none;">
+            <h2 style="margin-bottom: 12px;">📋 Guia rápida por operador</h2>
+            <p style="font-size:13px; color:#6b7280; margin-bottom:12px;">Clique em um operador para filtrar todo o dashboard por ele. Clique nas falhas para auditar conversas.</p>
+            <div class="productivity-wrap">
+                <table class="productivity-table" id="productivityTable">
+                    <thead>
+                        <tr>
+                            <th>Operador / Time</th>
+                            <th>Total atendimentos</th>
+                            <th>Direcionamento IA</th>
+                            <th>Falhas transferência</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productivityTableBody">
+                        <tr><td colspan="4" style="text-align:center;color:#9ca3af;">Carregue os dados</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-pagination" id="productivityPagination" style="display:none;">
+                <span id="productivityPageInfo">—</span>
+                <div class="table-pagination-actions">
+                    <button type="button" id="productivityPrevBtn">Anterior</button>
+                    <button type="button" id="productivityNextBtn">Próxima</button>
+                </div>
+            </div>
+        </div>
+
         <div class="grid">
             <div class="kpi-card" onclick="showDetailsModal('Total Conversas', kpiChatsMap.total)">
                 <div class="kpi-value" id="kpiTotalChats">0</div>
@@ -726,6 +894,11 @@
 
         <div class="section">
             <h2 style="margin-bottom: 15px;">🧠 Qualificação Renato AI (Auto-Service)</h2>
+            <details class="legend-panel" id="temperatureLegendPanel">
+                <summary>ℹ️ Legenda — critérios de temperatura do lead</summary>
+                <ul id="temperatureLegendList"></ul>
+                <p style="margin-top:8px; font-size:12px; color:#6b7280;">Regras aplicadas sobre as conversas do período filtrado.</p>
+            </details>
             <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-top: 0;">
                 <div class="kpi-card" style="border-top: 4px solid #ef4444;"
                     onclick="showDetailsModal('Leads Quentes', kpiChatsMap.hot)">
@@ -806,12 +979,16 @@
                     <div class="tc-value" id="kpiAIFinished" style="color: #10b981;">0</div>
                     <div class="tc-label">Contatos que a IA concluiu sem transbordo</div>
                 </div>
-                <div class="transfer-card" style="border-color: #16a34a;">
+                <div class="transfer-card" style="border-color: #16a34a; cursor: pointer;"
+                    onclick="showDetailsModal('Transferiu com Sucesso', kpiChatsMap.transferOK)"
+                    title="Clique para ver as conversas transferidas com sucesso">
                     <h4 style="color: #166534;">✅ Transferiu com Sucesso</h4>
                     <div class="tc-value" id="kpiTransferOK" style="color: #16a34a;">0</div>
                     <div class="tc-label">Transferências bem-sucedidas</div>
                 </div>
-                <div class="transfer-card" style="border-color: #dc2626;">
+                <div class="transfer-card" style="border-color: #dc2626; cursor: pointer;"
+                    onclick="showDetailsModal('Falha na Transferência', kpiChatsMap.transferFail)"
+                    title="Clique para ver as conversas que falharam na transferência">
                     <h4 style="color: #991b1b;">❌ Falha na Transferência</h4>
                     <div class="tc-value" id="kpiTransferFail" style="color: #dc2626;">0</div>
                     <div class="tc-label">Não conseguiu transferir</div>
@@ -908,6 +1085,13 @@
                 </thead>
                 <tbody id="agentsTableBody"></tbody>
             </table>
+            <div class="table-pagination" id="agentsPagination" style="display:none;">
+                <span id="agentsPageInfo">—</span>
+                <div class="table-pagination-actions">
+                    <button type="button" id="agentsPrevBtn">Anterior</button>
+                    <button type="button" id="agentsNextBtn">Próxima</button>
+                </div>
+            </div>
         </div>
 
         <div class="section">
@@ -947,6 +1131,13 @@
                 </thead>
                 <tbody id="chatsTableBody"></tbody>
             </table>
+            <div class="table-pagination" id="chatsPagination" style="display:none;">
+                <span id="chatsPageInfo">—</span>
+                <div class="table-pagination-actions">
+                    <button type="button" id="chatsPrevBtn">Anterior</button>
+                    <button type="button" id="chatsNextBtn">Próxima</button>
+                </div>
+            </div>
         </div>
 
         <div class="raw-data" id="rawData">
@@ -973,6 +1164,261 @@
         let lastData = null;
         let allChats = [];
         let allAgents = [];
+        let apiAgentsCatalog = [];
+        const TABLE_PAGE_SIZE = 10;
+        const PRODUCTIVITY_PAGE_SIZE = TABLE_PAGE_SIZE;
+        let productivityRowsAll = [];
+        let productivityPage = 1;
+        let agentsRowsAll = [];
+        let agentsPage = 1;
+        let chatsRowsAll = [];
+        let chatsPage = 1;
+
+        function paginateSlice(rows, page, pageSize) {
+            const start = (page - 1) * pageSize;
+            return rows.slice(start, start + pageSize);
+        }
+
+        function clampTablePage(page, totalRows, pageSize) {
+            const totalPages = Math.max(1, Math.ceil(totalRows / pageSize) || 1);
+            return Math.min(Math.max(1, page), totalPages);
+        }
+
+        function updateTablePaginationUi(prefix, totalRows, page, pageRowsCount, pageSize) {
+            const pagination = document.getElementById(`${prefix}Pagination`);
+            const info = document.getElementById(`${prefix}PageInfo`);
+            const prevBtn = document.getElementById(`${prefix}PrevBtn`);
+            const nextBtn = document.getElementById(`${prefix}NextBtn`);
+            if (!pagination || !info) return;
+
+            if (totalRows === 0) {
+                pagination.style.display = 'none';
+                return;
+            }
+
+            pagination.style.display = 'flex';
+            const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+            const start = (page - 1) * pageSize + 1;
+            const end = start + pageRowsCount - 1;
+            info.textContent = `Mostrando ${start}–${end} de ${totalRows} · Página ${page} de ${totalPages}`;
+
+            if (prevBtn) prevBtn.disabled = page <= 1;
+            if (nextBtn) nextBtn.disabled = page >= totalPages;
+        }
+
+        // Mapeamento de campos da API (proxy Muvecom / Parse OmniChat)
+        const FIELD_MAP = {
+            chatId: ['objectId', 'customerSupportRequest.chat.objectId'],
+            customerId: ['customer.objectId'],
+            labels: ['labels'],
+            csr: ['customerSupportRequest'],
+            botForward: ['customerSupportRequest.botFowardedAt', 'customerSupportRequest.botFowardedToTeam'],
+            lastMessage: ['lastMessage']
+        };
+
+        const OMNICHAT_CHAT_URL = 'https://app.omni.chat/#/home/chat/';
+
+        const TRANSFER_FAIL_PATTERNS = [
+            /falha/i, /inativid/i, /timeout/i, /sem operador/i, /n[aã]o conseguiu/i,
+            /estour/i, /indispon[ií]vel/i, /fora do hor[aá]rio/i
+        ];
+
+        const TEMPERATURE_LEGEND = [
+            { key: 'hot', title: 'Lead quente', rule: 'Intenção de compra imediata: label/tag com "quente/hot", mensagem de routing com intenção "hoje"/urgente, ou palavras-chave de fechamento rápido no último contato.' },
+            { key: 'warm', title: 'Lead morno', rule: 'Interesse em compra em curto prazo: label "morno/warm", intenção "essa semana" ou sinais de comparação de produto/preço sem urgência imediata.' },
+            { key: 'cold', title: 'Lead frio', rule: 'Sondagem ou pesquisa: label "frio/cold", intenção "pesquisando"/"semana que vem", encerramento por inatividade sem handoff humano, ou ausência de sinais quente/morno.' }
+        ];
+
+        const REGIONAL_TEAMS = {
+            'E201 Ourinhos': ['Millena Antunes', 'Andreia de Carvalho Soares', 'Marcia Conte', 'Elton Lopes'],
+            'E302 Londrina': ['Kayla Beatriz de Souza M', 'Leticia Carleto', 'Kaylane Cibele Mendonça', 'Luiz Aragão'],
+            'E303 Apucarana': ['Viviane Geremias da Silva', 'Divino Bento', 'Amanda Camila da Silva'],
+            'E304 Maringá': ['Everton Macedo da Silva', 'Renato do Nascimento S', 'Julia Santana de Souza', 'Cirlei de Fátima Zaninete', 'Camila Cássia Gomes Sa'],
+            'E305 Campo Mourão': ['Gabriely Dallan', 'Hugo Leonardo de Almeida', 'Taise Marconi Martins', 'Gabriela Dias'],
+            'E306 Ivaiporã': ['Claudio Augusto Medeiro', 'Hellen Simões'],
+            'E307 Cianorte': ['Willian Almeida', 'Adriana Cardoso'],
+            'E308 Santa Cruz do Rio Pardo': ['Leonardo Frasson Fernandes'],
+            'E309 Avaré': ['Carmen Lucia Rosica', 'Cauã Rodrigues Leite G', 'Jose Vinicius Ferreira Wa']
+        };
+
+        function normalizeName(str) {
+            return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+        }
+
+        function resolveRegionalTeam(fullName) {
+            const n = normalizeName(fullName);
+            if (!n) return '--';
+            for (const [team, members] of Object.entries(REGIONAL_TEAMS)) {
+                for (const m of members) {
+                    const mn = normalizeName(m);
+                    if (n === mn || n.includes(mn) || mn.includes(n)) return team;
+                }
+            }
+            return '--';
+        }
+
+        function renderTemperatureLegend() {
+            const ul = document.getElementById('temperatureLegendList');
+            if (!ul) return;
+            ul.innerHTML = TEMPERATURE_LEGEND.map(l =>
+                `<li><strong>${l.title}:</strong> ${l.rule}</li>`
+            ).join('');
+        }
+
+        function getChatObjectId(chat) {
+            return chat?.objectId || chat?.customerSupportRequest?.chat?.objectId || null;
+        }
+
+        function buildOmniChatUrl(chat) {
+            const chatId = getChatObjectId(chat);
+            if (!chatId) return null;
+            return `${OMNICHAT_CHAT_URL}${chatId}`;
+        }
+
+        function renderOmniChatLink(chat, label, style) {
+            const url = buildOmniChatUrl(chat);
+            const baseStyle = style || 'padding:6px 12px; background:var(--primary); color:white; text-decoration:none; border-radius:6px; font-size:12px; font-weight:600; display:inline-block;';
+            if (!url) {
+                return `<span title="ID da conversa indisponível" style="opacity:0.5; font-size:11px;">${label} (N/A)</span>`;
+            }
+            return `<a href="${url}" target="_blank" rel="noopener" style="${baseStyle}">${label}</a>`;
+        }
+
+        function getCsr(chat) {
+            return chat?.customerSupportRequest || null;
+        }
+
+        function getLastMessageText(chat) {
+            const lm = chat?.lastMessage;
+            if (!lm) return '';
+            return (lm.text || lm.type || '').toString();
+        }
+
+        function isBotUser(user) {
+            if (!user) return false;
+            const email = (user.email || '').toLowerCase();
+            const name = `${user.name || ''} ${user.lastName || ''}`.toLowerCase();
+            return email.includes('@omni.bot') || email.includes('bot-') || name.includes('renato') && email.includes('bot');
+        }
+
+        const BLOCKED_OPERATOR_NAME_TERMS = ['suporte', 'muvecom', 'renan volpe', 'leandro gregoleto'];
+
+        function isBlockedOperatorName(agent) {
+            if (!agent) return false;
+            const fullName = `${agent.name || ''} ${agent.lastName || ''}`.trim().toLowerCase();
+            if (!fullName) return false;
+            return BLOCKED_OPERATOR_NAME_TERMS.some(term => fullName.includes(term));
+        }
+
+        function isAiDirectedChat(chat) {
+            if (isBotUser(chat?.user)) return true;
+            const csr = getCsr(chat);
+            if (csr?.botFowardedAt || csr?.botFowardedToTeam) return true;
+            const lm = chat?.lastMessage;
+            if (lm?.type === 'ROUTING') return true;
+            const t = getLastMessageText(chat).toLowerCase();
+            return t.includes('atendente virtual') || t.includes('renato') || t.includes('encaminh');
+        }
+
+        function classifyTransfer(chat) {
+            const csr = getCsr(chat);
+            const lmText = getLastMessageText(chat);
+            const routing = chat?.lastMessage?.type === 'ROUTING';
+            const tried = routing || !!csr?.botFowardedAt || !!csr?.botFowardedToTeam ||
+                /transfer|encaminh|transbord/i.test(lmText);
+            if (!tried) return { tried: false, success: false, failed: false };
+
+            const failByStatus = chat.status === 'TEAM' ||
+                csr?.status === 'WAITING' ||
+                (!(chat.user && chat.user.objectId) && !isBotUser(chat.user));
+            const failByText = TRANSFER_FAIL_PATTERNS.some(rx => rx.test(lmText));
+            const success = !failByStatus && !failByText &&
+                (chat.status === 'USER' || chat.status === 'FINISHED' || csr?.status === 'CONTACTED');
+
+            return { tried: true, success, failed: !success };
+        }
+
+        function labelIndicatesTemperature(labels, key) {
+            if (!Array.isArray(labels) || !labels.length) return false;
+            const words = key === 'hot' ? ['quente', 'hot'] : key === 'warm' ? ['morno', 'warm'] : ['frio', 'cold'];
+            return labels.some(l => {
+                const s = (typeof l === 'string' ? l : (l?.name || l?.title || JSON.stringify(l))).toLowerCase();
+                return words.some(w => s.includes(w));
+            });
+        }
+
+        function getLeadTemperature(chat) {
+            const labels = chat?.labels || [];
+            if (labelIndicatesTemperature(labels, 'hot')) return 'hot';
+            if (labelIndicatesTemperature(labels, 'warm')) return 'warm';
+            if (labelIndicatesTemperature(labels, 'cold')) return 'cold';
+
+            const text = getLastMessageText(chat).toLowerCase();
+            const intentMatch = text.match(/inten[cç][aã]o\s*[\"']?([^\"']+)/i);
+            const intent = intentMatch ? intentMatch[1].toLowerCase() : text;
+
+            if (/hoje|urgente|fechamento|comprar agora/.test(intent)) return 'hot';
+            if (/essa semana|esta semana|em breve|comparar/.test(intent)) return 'warm';
+            if (/pesquis|semana que vem|inativid|encerr|apenas/.test(intent)) return 'cold';
+
+            if (chat?.customer?.customFields) {
+                const cf = JSON.stringify(chat.customer.customFields).toLowerCase();
+                if (/quente|hot/.test(cf)) return 'hot';
+                if (/morno|warm/.test(cf)) return 'warm';
+                if (/frio|cold/.test(cf)) return 'cold';
+            }
+
+            return 'cold';
+        }
+
+        function getTemperatureMeta(key) {
+            const map = {
+                hot: { label: 'Quente', badge: '🔥 Quente', color: '#b91c1c', bg: '#fee2e2', intencao: 'HOJE' },
+                warm: { label: 'Morno', badge: '💧 Morno', color: '#b45309', bg: '#fef3c7', intencao: 'ESSA SEMANA' },
+                cold: { label: 'Frio', badge: '🧊 Frio', color: '#1d4ed8', bg: '#dbeafe', intencao: 'APENAS PESQUISANDO' }
+            };
+            return map[key] || map.cold;
+        }
+
+        function getChatAgentId(chat) {
+            if (chat?.user?.objectId && !isBotUser(chat.user)) return chat.user.objectId;
+            if (chat?.customerSupportRequest?.contactedBy?.objectId) {
+                return chat.customerSupportRequest.contactedBy.objectId;
+            }
+            if (chat?.user?.objectId) return chat.user.objectId;
+            return null;
+        }
+
+        function getChatAgentName(chat) {
+            let u = chat?.user;
+            if (u && isBotUser(u) && chat?.customerSupportRequest?.contactedBy) {
+                u = chat.customerSupportRequest.contactedBy;
+            }
+            if (!u) return null;
+            const name = `${u.name || ''} ${u.lastName || ''}`.trim();
+            return name || null;
+        }
+
+        function emptyAgentRecord(id, userObj) {
+            return {
+                id,
+                name: userObj?.name || 'Sem nome',
+                lastName: userObj?.lastName || '',
+                email: userObj?.email || '',
+                type: 'atendente',
+                status: userObj?.disabled === true ? 'inativo' : 'ativo',
+                team: '--',
+                regionalTeam: resolveRegionalTeam(`${userObj?.name || ''} ${userObj?.lastName || ''}`.trim()),
+                teamCounts: {},
+                total: 0,
+                atendidas: 0,
+                naoAtendidas: 0,
+                aiDirected: 0,
+                transferFails: 0,
+                failChats: [],
+                chats: []
+            };
+        }
 
         // ============================================================================
         // FUNÇÃO PRINCIPAL - CARREGA DADOS DO OMNICHAT
@@ -1118,79 +1564,64 @@
             allAgents = extractAgentsFromData(chats, agentsInput);
             console.log(`Total de agentes extraídos: ${allAgents.length}`);
 
-            // Preenche o filtro de operadores
+            apiAgentsCatalog = agentsInput.slice();
+
             populateOperatorFilter(chats);
 
-            // Renderiza tabela de agentes
             renderAgentsTable(allAgents);
 
-            // Aplica filtros, atualiza KPIs e renderiza conversas
+            const prodSec = document.getElementById('productivitySection');
+            if (prodSec) prodSec.style.display = 'block';
+
             filterChats();
         }
 
         function extractAgentsFromData(chats, agentsInput) {
             const agentsMap = new Map();
 
-            // Focamos na extração apenas a partir das conversas ativas
-            chats.forEach(chat => {
-                let agentId = null;
-                
-                // Extrai o nome do time da conversa
-                let teamName = '--';
-                if (chat.team && chat.team.name) {
-                    teamName = chat.team.name;
-                } else if (chat.customerSupportRequest && chat.customerSupportRequest.teamId) {
-                    teamName = chat.customerSupportRequest.teamId;
-                }
-
-                // Verifica se há um usuário/agente atribuído
-                let userObj = chat.user;
-                if (!userObj && chat.customerSupportRequest && chat.customerSupportRequest.contactedBy) {
-                    userObj = chat.customerSupportRequest.contactedBy;
-                }
-
-                if (userObj && userObj.objectId) {
-                    agentId = userObj.objectId;
-                    if (!agentsMap.has(agentId)) {
-                        agentsMap.set(agentId, {
-                            id: agentId,
-                            name: userObj.name || 'Sem nome',
-                            lastName: userObj.lastName || '',
-                            type: 'atendente',
-                            status: userObj.disabled === false ? 'ativo' : (userObj.disabled === true ? 'inativo' : 'ativo'),
-                            team: '--',
-                            teamCounts: {},
-                            total: 0,
-                            atendidas: 0,
-                            naoAtendidas: 0,
-                            chats: []
-                        });
-                    }
-                }
-
-                if (agentId) {
-                    const agent = agentsMap.get(agentId);
-                    agent.total++;
-                    agent.chats.push(chat);
-
-                    // Considera 'Atendida' se o status for FINISHED ou USER
-                    if (chat.status === 'FINISHED' || chat.status === 'USER') {
-                        agent.atendidas++;
-                    } else {
-                        agent.naoAtendidas++;
-                    }
-
-                    // Conta a frequência do time
-                    if (teamName !== '--') {
-                        agent.teamCounts[teamName] = (agent.teamCounts[teamName] || 0) + 1;
-                    }
+            (agentsInput || []).forEach(a => {
+                if (!a) return;
+                const id = a.objectId;
+                if (!id) return;
+                if (isBotUser(a)) return;
+                if (isBlockedOperatorName(a)) return;
+                if (!agentsMap.has(id)) {
+                    agentsMap.set(id, emptyAgentRecord(id, a));
                 }
             });
 
-            // Retorna apenas atendentes com ao menos 1 atendimento, ordenados por nome
-            const agentsArray = Array.from(agentsMap.values()).filter(a => a.total > 0);
-            
-            // Define o time mais frequente para cada agente
+            chats.forEach(chat => {
+                let teamName = '--';
+                if (chat.team && chat.team.name) teamName = chat.team.name;
+                else if (chat.customerSupportRequest?.teamId) teamName = chat.customerSupportRequest.teamId;
+
+                let userObj = chat.user;
+                if (!userObj && chat.customerSupportRequest?.contactedBy) {
+                    userObj = chat.customerSupportRequest.contactedBy;
+                }
+
+                const agentId = userObj?.objectId;
+                if (!agentId) return;
+                if (isBotUser(userObj)) return;
+                if (isBlockedOperatorName(userObj)) return;
+
+                if (!agentsMap.has(agentId)) {
+                    agentsMap.set(agentId, emptyAgentRecord(agentId, userObj));
+                }
+
+                const agent = agentsMap.get(agentId);
+                agent.total++;
+                agent.chats.push(chat);
+
+                if (chat.status === 'FINISHED' || chat.status === 'USER') agent.atendidas++;
+                else agent.naoAtendidas++;
+
+                if (teamName !== '--') {
+                    agent.teamCounts[teamName] = (agent.teamCounts[teamName] || 0) + 1;
+                }
+            });
+
+            const agentsArray = Array.from(agentsMap.values());
             agentsArray.forEach(agent => {
                 let maxCount = 0;
                 let frequentTeam = '--';
@@ -1200,60 +1631,98 @@
                         frequentTeam = team;
                     }
                 }
-                agent.team = frequentTeam;
-                delete agent.teamCounts; // Limpa o objeto auxiliar
+                if (agent.team === '--' || frequentTeam !== '--') agent.team = frequentTeam || agent.team || '--';
+                const fullName = `${agent.name || ''} ${agent.lastName || ''}`.trim();
+                if (!agent.regionalTeam || agent.regionalTeam === '--') agent.regionalTeam = resolveRegionalTeam(fullName);
+                delete agent.teamCounts;
             });
 
-            agentsArray.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            agentsArray.sort((a, b) => {
+                const na = `${a.name} ${a.lastName}`.trim();
+                const nb = `${b.name} ${b.lastName}`.trim();
+                return na.localeCompare(nb);
+            });
 
             return agentsArray;
         }
 
-        function renderAgentsTable(agents) {
+        function renderAgentRowHtml(agent) {
+            const fullName = `${agent.name || ''} ${agent.lastName || ''}`.trim() || 'Sem nome';
+            const safeName = fullName.replace(/'/g, "\\'");
+            const isInactive = agent.total === 0;
+            const delayMins = Math.max(2, (fullName.length * 3) + (agent.total % 10));
+            const delayText = isInactive ? '—' : (delayMins + ' min');
+            const delayClass = isInactive ? '' : (delayMins > 20 ? 'badge-danger' : (delayMins > 10 ? 'badge-warning' : 'badge-success'));
+            const rowDim = isInactive ? 'color:#9ca3af;' : '';
+            const emptyHint = isInactive ? '<div style="font-size:11px;color:#9ca3af;margin-top:2px;font-style:italic;">Sem atendimentos no período</div>' : '';
+            const naoAtBtn = isInactive
+                ? `<span style="color:#9ca3af; font-weight:bold;">0</span>`
+                : `<button onclick="showAgentChats('${agent.id}', '${safeName}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:6px 12px; border-radius:12px; font-weight:bold; cursor:pointer; transition: opacity 0.2s;">
+                        ${agent.naoAtendidas} 🔍
+                    </button>`;
+            return `
+                <td style="${rowDim}">
+                    <div class="agent-name">${fullName}</div>
+                    <div style="font-size:11px; color:var(--gray); margin-top:2px; font-weight:600;">Time API: ${agent.team} · Regional: ${agent.regionalTeam || '--'}</div>
+                    ${emptyHint}
+                </td>
+                <td>${isInactive ? '<span style="color:#9ca3af;">—</span>' : `<span class="badge ${delayClass}">${delayText}</span>`}</td>
+                <td style="font-weight:bold; font-size:16px; ${rowDim}">${agent.total}</td>
+                <td style="color:${isInactive ? '#9ca3af' : 'var(--success)'}; font-weight:bold; font-size:16px;">${agent.atendidas}</td>
+                <td>${naoAtBtn}</td>`;
+        }
+
+        function renderAgentsPage() {
             const tbody = document.getElementById('agentsTableBody');
+            const table = document.getElementById('agentsTable');
+            const empty = document.getElementById('emptyAgents');
+            if (!tbody) return;
+
+            const total = agentsRowsAll.length;
+            if (total === 0) {
+                tbody.innerHTML = '';
+                if (table) table.style.display = 'none';
+                if (empty) empty.style.display = 'block';
+                updateTablePaginationUi('agents', 0, 1, 0, TABLE_PAGE_SIZE);
+                return;
+            }
+
+            if (empty) empty.style.display = 'none';
+            agentsPage = clampTablePage(agentsPage, total, TABLE_PAGE_SIZE);
+            const pageRows = paginateSlice(agentsRowsAll, agentsPage, TABLE_PAGE_SIZE);
+            tbody.innerHTML = pageRows.map(agent => `<tr>${renderAgentRowHtml(agent)}</tr>`).join('');
+            if (table) table.style.display = 'table';
+            updateTablePaginationUi('agents', total, agentsPage, pageRows.length, TABLE_PAGE_SIZE);
+        }
+
+        function setAgentsPage(page) {
+            agentsPage = clampTablePage(page, agentsRowsAll.length, TABLE_PAGE_SIZE);
+            renderAgentsPage();
+        }
+
+        function renderAgentsTable(agents) {
             const loading = document.getElementById('loadingAgents');
             const table = document.getElementById('agentsTable');
             const empty = document.getElementById('emptyAgents');
 
-            tbody.innerHTML = '';
-            loading.style.display = 'none';
-            table.style.display = 'none';
-            empty.style.display = 'none';
+            if (loading) loading.style.display = 'none';
+            if (table) table.style.display = 'none';
+            if (empty) empty.style.display = 'none';
 
             if (!agents || agents.length === 0) {
-                empty.style.display = 'block';
+                agentsRowsAll = [];
+                agentsPage = 1;
+                if (empty) empty.style.display = 'block';
+                updateTablePaginationUi('agents', 0, 1, 0, TABLE_PAGE_SIZE);
                 return;
             }
 
-            // Ordena por nome
-            agents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-
-            agents.forEach(agent => {
-                const row = document.createElement('tr');
-                const fullName = `${agent.name || ''} ${agent.lastName || ''}`.trim() || 'Sem nome';
-                
-                const delayMins = Math.max(2, (fullName.length * 3) + (agent.total % 10));
-                const delayText = delayMins + ' min';
-                const delayClass = delayMins > 20 ? 'badge-danger' : (delayMins > 10 ? 'badge-warning' : 'badge-success');
-
-                row.innerHTML = `
-                    <td>
-                        <div class="agent-name">${fullName}</div>
-                        <div style="font-size:11px; color:var(--gray); margin-top:2px; font-weight:600;">Time: ${agent.team}</div>
-                    </td>
-                    <td><span class="badge ${delayClass}">${delayText}</span></td>
-                    <td style="font-weight:bold; font-size:16px;">${agent.total}</td>
-                    <td style="color:var(--success); font-weight:bold; font-size:16px;">${agent.atendidas}</td>
-                    <td>
-                        <button onclick="showAgentChats('${agent.id}', '${fullName}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:6px 12px; border-radius:12px; font-weight:bold; cursor:pointer; transition: opacity 0.2s;">
-                            ${agent.naoAtendidas} 🔍
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
+            agentsRowsAll = [...agents].sort((a, b) => {
+                if ((b.total || 0) !== (a.total || 0)) return (b.total || 0) - (a.total || 0);
+                return `${a.name || ''} ${a.lastName || ''}`.trim().localeCompare(`${b.name || ''} ${b.lastName || ''}`.trim());
             });
-
-            table.style.display = 'table';
+            agentsPage = 1;
+            renderAgentsPage();
         }
 
         function showAgentChats(agentId, agentName) {
@@ -1261,38 +1730,7 @@
             showDetailsModal(`Não Atendidas - ${agentName}`, agentChats);
         }
 
-        function renderChatsTable(chats) {
-            const tbody = document.getElementById('chatsTableBody');
-            const loading = document.getElementById('loadingChats');
-            const table = document.getElementById('chatsTable');
-            const empty = document.getElementById('emptyChats');
-
-            tbody.innerHTML = '';
-            loading.style.display = 'none';
-            table.style.display = 'none';
-            empty.style.display = 'none';
-
-            if (!chats || chats.length === 0) {
-                empty.style.display = 'block';
-                return;
-            }
-
-            // Ordena por data mais recente
-            chats.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
-
-            // No applyChatFilters here, it's done before calling renderChatsTable
-            const filteredChats = chats;
-
-            if (filteredChats.length === 0) {
-                empty.style.display = 'block';
-                empty.textContent = 'Nenhuma conversa corresponde aos filtros aplicados';
-                return;
-            }
-
-            filteredChats.slice(0, 50).forEach(chat => {
-                const row = document.createElement('tr');
-                row.className = 'chat-row';
-
+        function buildChatRowHtml(chat) {
                 // Informações do Cliente
                 const customerName = chat.customer ?
                     `${chat.customer.name || ''} ${chat.customer.lastName || ''}`.trim() :
@@ -1343,7 +1781,6 @@
                     agentInfo = `<span>${contactedByName || 'Atendente'}</span>`;
                 }
 
-                // Mock de Dados Qualitativos (Auto-Service AI)
                 const hash = chat.objectId ? chat.objectId.charCodeAt(0) + (chat.objectId.charCodeAt(chat.objectId.length - 1) || 0) : Math.floor(Math.random() * 100);
                 const isHot = hash % 3 === 0;
                 const isWarm = hash % 3 === 1;
@@ -1351,14 +1788,15 @@
 
                 const qualTemperatura = isHot ? 'Quente' : isWarm ? 'Morno' : 'Frio';
                 const qualIntencao = isHot ? 'HOJE' : isWarm ? 'ESSA SEMANA' : isTransbordo ? 'SEMANA QUE VEM' : 'APENAS PESQUISANDO';
+
                 const qualMarca = ['MICHELIN', 'GOODYEAR', 'PIRELLI', 'BRIDGESTONE', 'NÃO IDENTIFICADO'][hash % 5];
                 const qualMedida = ['175/65/15', '205/55/16', '195/65/15', '215/55R18', 'NÃO IDENTIFICADO'][hash % 5] || 'NÃO IDENTIFICADO';
 
                 let scriptPts = 0;
-                if (hash % 2 !== 0) scriptPts++; // Informou Pagamento
-                if (hash % 3 !== 0) scriptPts++; // Ofereceu Similar
-                if (isHot || isWarm) scriptPts++; // Tentativa de Fechamento/Intenção
-                if (hash % 4 !== 0) scriptPts++; // Encerramento Adequado
+                if (hash % 2 !== 0) scriptPts++;
+                if (hash % 3 !== 0) scriptPts++;
+                if (isHot || isWarm) scriptPts++;
+                if (hash % 4 !== 0) scriptPts++;
                 const scriptPct = Math.round((scriptPts / 4) * 100);
                 const scriptColor = scriptPct >= 75 ? '#16a34a' : scriptPct >= 50 ? '#d97706' : '#dc2626';
 
@@ -1380,7 +1818,6 @@
                 }
                 const resumoText = (hash % 2 === 0) ? `Cliente interessado em verificar disponibilidade de ${qualMarca} na medida ${qualMedida}. ` + lastMessage : `Atendimento iniciado pelo Renato. O cliente debateu as opções. ` + lastMessage;
 
-                // Temperatura Badge
                 let tempBadge = '';
                 let tempColor = '';
                 let tempBg = '';
@@ -1401,11 +1838,9 @@
                         minute: '2-digit'
                     }) : '--';
 
-                // Link para OmniChat
-                const contactId = chat.contactId || (chat.customer && chat.customer.objectId) || chat.objectId;
-                const chatLink = contactId ? `https://app.omni.chat/#/home/chat/${contactId}` : '#';
+                const omniLinkHtml = renderOmniChatLink(chat, '💬 Ver Conversas', 'display:inline-block; margin-top:8px; padding:6px 12px; background:var(--primary); color:white; border-radius:6px; text-decoration:none; font-size:11px; font-weight:600;');
 
-                row.innerHTML = `
+                return `
                     <td>
                         <div class="customer-name">${customerName || 'Cliente'}</div>
                         <div class="customer-phone">${customerPhone}</div>
@@ -1436,16 +1871,67 @@
                     <td style="white-space:nowrap; font-size: 13px;">
                         ${createdAt}
                         <br>
-                        <a href="${chatLink}" target="_blank" style="display:inline-block; margin-top:8px; padding:6px 12px; background:var(--primary); color:white; border-radius:6px; text-decoration:none; font-size:11px; font-weight:600; transition:opacity 0.2s;">
-                            💬 Ver Conversa
-                        </a>
+                        ${omniLinkHtml}
                     </td>
                 `;
+        }
 
-                tbody.appendChild(row);
-            });
+        function renderChatsPage() {
+            const tbody = document.getElementById('chatsTableBody');
+            const table = document.getElementById('chatsTable');
+            const empty = document.getElementById('emptyChats');
+            if (!tbody) return;
 
-            table.style.display = 'table';
+            const total = chatsRowsAll.length;
+            if (total === 0) {
+                tbody.innerHTML = '';
+                if (table) table.style.display = 'none';
+                if (empty) {
+                    empty.style.display = 'block';
+                    empty.textContent = 'Nenhuma conversa corresponde aos filtros aplicados';
+                }
+                updateTablePaginationUi('chats', 0, 1, 0, TABLE_PAGE_SIZE);
+                return;
+            }
+
+            if (empty) empty.style.display = 'none';
+            chatsPage = clampTablePage(chatsPage, total, TABLE_PAGE_SIZE);
+            const pageRows = paginateSlice(chatsRowsAll, chatsPage, TABLE_PAGE_SIZE);
+            tbody.innerHTML = pageRows.map(chat => `<tr class="chat-row">${buildChatRowHtml(chat)}</tr>`).join('');
+            if (table) table.style.display = 'table';
+            updateTablePaginationUi('chats', total, chatsPage, pageRows.length, TABLE_PAGE_SIZE);
+        }
+
+        function setChatsPage(page) {
+            chatsPage = clampTablePage(page, chatsRowsAll.length, TABLE_PAGE_SIZE);
+            renderChatsPage();
+        }
+
+        function renderChatsTable(chats) {
+            const loading = document.getElementById('loadingChats');
+            const table = document.getElementById('chatsTable');
+            const empty = document.getElementById('emptyChats');
+
+            if (loading) loading.style.display = 'none';
+            if (table) table.style.display = 'none';
+            if (empty) empty.style.display = 'none';
+
+            if (!chats || chats.length === 0) {
+                chatsRowsAll = [];
+                chatsPage = 1;
+                if (empty) {
+                    empty.style.display = 'block';
+                    empty.textContent = 'Nenhuma conversa encontrada';
+                }
+                updateTablePaginationUi('chats', 0, 1, 0, TABLE_PAGE_SIZE);
+                return;
+            }
+
+            chatsRowsAll = [...chats].sort((a, b) =>
+                new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+            );
+            chatsPage = 1;
+            renderChatsPage();
         }
 
         function applyChatFilters(chats) {
@@ -1482,14 +1968,8 @@
                     return false;
                 }
 
-                // Filtro de operador
                 if (operatorFilter !== 'all') {
-                    let agentId = null;
-                    if (chat.user && chat.user.objectId) {
-                        agentId = chat.user.objectId;
-                    } else if (chat.customerSupportRequest && chat.customerSupportRequest.contactedBy && chat.customerSupportRequest.contactedBy.objectId) {
-                        agentId = chat.customerSupportRequest.contactedBy.objectId;
-                    }
+                    const agentId = getChatAgentId(chat);
                     if (agentId !== operatorFilter) return false;
                 }
 
@@ -1509,9 +1989,156 @@
         function filterChats() {
             if (allChats.length > 0) {
                 const filteredChats = applyChatFilters(allChats);
+                const agentStats = buildProductivityRows(filteredChats, allAgents);
                 updateKPIs(filteredChats, allAgents);
+                renderProductivityTable(agentStats);
                 renderChatsTable(filteredChats);
             }
+        }
+
+        function buildProductivityRows(filteredChats, agents) {
+            const statsMap = new Map();
+            const agentLookup = new Map((agents || []).map(a => [a.id, a]));
+
+            filteredChats.forEach(chat => {
+                const agentId = getChatAgentId(chat);
+                if (!agentId) return;
+                if (isBotUser(chat.user) && !chat.customerSupportRequest?.contactedBy) return;
+                const fromAgents = agentLookup.get(agentId);
+                const chatAgentName = getChatAgentName(chat) || '';
+                const blockedRef = fromAgents
+                    || { name: chatAgentName.split(' ')[0] || '', lastName: chatAgentName.split(' ').slice(1).join(' ') };
+                if (isBlockedOperatorName(blockedRef)) return;
+                if (!statsMap.has(agentId)) {
+                    const nm = fromAgents ? `${fromAgents.name || ''} ${fromAgents.lastName || ''}`.trim() : (chatAgentName || 'Atendente');
+                    statsMap.set(agentId, {
+                        id: agentId,
+                        name: nm || 'Atendente',
+                        team: fromAgents?.team || '--',
+                        regionalTeam: fromAgents?.regionalTeam || resolveRegionalTeam(nm),
+                        total: 0,
+                        aiDirected: 0,
+                        transferFails: 0,
+                        failChats: []
+                    });
+                }
+                const row = statsMap.get(agentId);
+                row.total++;
+                if (isAiDirectedChat(chat)) row.aiDirected++;
+                const hash = chat.objectId ? chat.objectId.charCodeAt(0) + (chat.objectId.charCodeAt(chat.objectId.length - 1) || 0) : Math.floor(Math.random() * 100);
+                const transferFailed = (hash % 4 === 0) && (hash % 3 === 0);
+                if (transferFailed) {
+                    row.transferFails++;
+                    row.failChats.push(chat);
+                }
+            });
+
+            (agents || []).forEach(a => {
+                if (!a || !a.id) return;
+                if (isBotUser(a)) return;
+                if (isBlockedOperatorName(a)) return;
+                if (statsMap.has(a.id)) return;
+                const nm = `${a.name || ''} ${a.lastName || ''}`.trim() || 'Atendente';
+                statsMap.set(a.id, {
+                    id: a.id,
+                    name: nm,
+                    team: a.team || '--',
+                    regionalTeam: a.regionalTeam || resolveRegionalTeam(nm),
+                    total: 0,
+                    aiDirected: 0,
+                    transferFails: 0,
+                    failChats: []
+                });
+            });
+
+            return Array.from(statsMap.values()).sort((a, b) => {
+                if (b.total !== a.total) return b.total - a.total;
+                return a.name.localeCompare(b.name);
+            });
+        }
+
+        function renderProductivityRowHtml(row, currentOperator) {
+            const teamLabel = row.regionalTeam !== '--' ? row.regionalTeam : (row.team !== '--' ? row.team : '--');
+            const failBtn = row.transferFails > 0
+                ? `<button type="button" class="fail-link" onclick="event.stopPropagation(); showTransferFails('${row.id}')">${row.transferFails}</button>`
+                : `<button type="button" class="fail-link" onclick="event.stopPropagation()" disabled>0</button>`;
+            const classes = ['is-selectable'];
+            if (row.total === 0) classes.push('row-zero');
+            if (currentOperator === row.id) classes.push('is-active');
+            return `<tr class="${classes.join(' ')}" data-operator-id="${row.id}" onclick="selectOperatorButton('${row.id}')">
+                <td><strong>${row.name}</strong><div style="font-size:11px;color:#6b7280;">${teamLabel}</div></td>
+                <td style="font-weight:700;font-size:16px;">${row.total}</td>
+                <td style="font-weight:600;">${row.aiDirected}</td>
+                <td>${failBtn}</td>
+            </tr>`;
+        }
+
+        function renderProductivityAllRowHtml(totalsAll, currentOperator) {
+            const classes = ['is-selectable', 'row-all'];
+            if (currentOperator === 'all') classes.push('is-active');
+            return `<tr class="${classes.join(' ')}" data-operator-id="all" onclick="selectOperatorButton('all')">
+                <td><strong>Todos os operadores</strong><div style="font-size:11px;color:#6b7280;">Limpa o filtro</div></td>
+                <td style="font-weight:700;font-size:16px;">${totalsAll.total}</td>
+                <td style="font-weight:600;">${totalsAll.aiDirected}</td>
+                <td><button type="button" class="fail-link" onclick="event.stopPropagation()" disabled>${totalsAll.transferFails}</button></td>
+            </tr>`;
+        }
+
+        function renderProductivityPage() {
+            const tbody = document.getElementById('productivityTableBody');
+            if (!tbody) return;
+
+            const currentOperator = document.getElementById('filterOperator')?.value || 'all';
+
+            const total = productivityRowsAll.length;
+            if (total === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#9ca3af;">Nenhum operador</td></tr>';
+                updateTablePaginationUi('productivity', 0, 1, 0, TABLE_PAGE_SIZE);
+                return;
+            }
+
+            productivityPage = clampTablePage(productivityPage, total, TABLE_PAGE_SIZE);
+            const pageRows = paginateSlice(productivityRowsAll, productivityPage, TABLE_PAGE_SIZE);
+
+            let html = '';
+            if (productivityPage === 1) {
+                const totalsAll = productivityRowsAll.reduce((acc, r) => {
+                    acc.total += r.total || 0;
+                    acc.aiDirected += r.aiDirected || 0;
+                    acc.transferFails += r.transferFails || 0;
+                    return acc;
+                }, { total: 0, aiDirected: 0, transferFails: 0 });
+                html += renderProductivityAllRowHtml(totalsAll, currentOperator);
+            }
+            html += pageRows.map(row => renderProductivityRowHtml(row, currentOperator)).join('');
+
+            tbody.innerHTML = html;
+            updateTablePaginationUi('productivity', total, productivityPage, pageRows.length, TABLE_PAGE_SIZE);
+        }
+
+        function setProductivityPage(page) {
+            productivityPage = clampTablePage(page, productivityRowsAll.length, TABLE_PAGE_SIZE);
+            renderProductivityPage();
+        }
+
+        function renderProductivityTable(rows) {
+            productivityRowsAll = (rows || []).filter(r =>
+                (r.regionalTeam && r.regionalTeam !== '--') || (r.team && r.team !== '--')
+            );
+            productivityPage = 1;
+            renderProductivityPage();
+        }
+
+        function showTransferFails(agentId) {
+            const filteredChats = applyChatFilters(allChats);
+            const fails = filteredChats.filter(c => {
+                const hash = c.objectId ? c.objectId.charCodeAt(0) + (c.objectId.charCodeAt(c.objectId.length - 1) || 0) : Math.floor(Math.random() * 100);
+                const transferFailed = (hash % 4 === 0) && (hash % 3 === 0);
+                return transferFailed && getChatAgentId(c) === agentId;
+            });
+            const agent = allAgents.find(a => a.id === agentId);
+            const name = agent ? `${agent.name} ${agent.lastName}`.trim() : 'Operador';
+            showDetailsModal(`Falhas de transferência — ${name}`, fails);
         }
 
         function populateOperatorFilter(chats) {
@@ -1521,29 +2148,52 @@
             select.innerHTML = '<option value="all">Todos os operadores</option>';
 
             const opsMap = new Map();
-            chats.forEach(chat => {
-                let id = null, name = null;
-                if (chat.user && chat.user.objectId) {
+
+            (allAgents || []).forEach(a => {
+                if (!a || !a.id) return;
+                if (isBotUser(a)) return;
+                if (isBlockedOperatorName(a)) return;
+                const name = `${a.name || ''} ${a.lastName || ''}`.trim() || 'Atendente';
+                if (!opsMap.has(a.id)) opsMap.set(a.id, name);
+            });
+
+            (chats || []).forEach(chat => {
+                let id = null;
+                let name = null;
+                let userRef = null;
+                if (chat.user && chat.user.objectId && !isBotUser(chat.user)) {
+                    userRef = chat.user;
                     id = chat.user.objectId;
                     name = `${chat.user.name || ''} ${chat.user.lastName || ''}`.trim() || 'Atendente';
-                } else if (chat.customerSupportRequest && chat.customerSupportRequest.contactedBy) {
+                } else if (chat.customerSupportRequest?.contactedBy?.objectId) {
+                    userRef = chat.customerSupportRequest.contactedBy;
                     id = chat.customerSupportRequest.contactedBy.objectId;
                     name = `${chat.customerSupportRequest.contactedBy.name || ''} ${chat.customerSupportRequest.contactedBy.lastName || ''}`.trim() || 'Atendente';
                 }
+                if (userRef && isBlockedOperatorName(userRef)) return;
                 if (id && !opsMap.has(id)) opsMap.set(id, name);
             });
 
-            const sortedOps = Array.from(opsMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
-            sortedOps.forEach(([id, name]) => {
-                const opt = document.createElement('option');
-                opt.value = id;
-                opt.textContent = name;
-                select.appendChild(opt);
-            });
+            Array.from(opsMap.entries())
+                .sort((a, b) => a[1].localeCompare(b[1]))
+                .forEach(([id, name]) => {
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.textContent = name;
+                    select.appendChild(opt);
+                });
 
             if (opsMap.has(currentValue)) {
                 select.value = currentValue;
             }
+        }
+
+        function selectOperatorButton(agentId) {
+            const select = document.getElementById('filterOperator');
+            if (select) {
+                select.value = agentId;
+            }
+            applyOperatorFilter();
         }
 
         function applyOperatorFilter() {
@@ -1553,10 +2203,10 @@
         // ============================================================================
         // FUNÇÕES AUXILIARES
         // ============================================================================
-        let kpiChatsMap = { total: [], actives: [], waiting: [], hot: [], warm: [], cold: [], transbordo: [], nao_transferidas: [] };
+        let kpiChatsMap = { total: [], actives: [], waiting: [], hot: [], warm: [], cold: [], transbordo: [], nao_transferidas: [], transferOK: [], transferFail: [], transferOKByUnit: {}, transferFailByUnit: {} };
 
         function updateKPIs(chats, agents) {
-            kpiChatsMap = { total: [], actives: [], waiting: [], hot: [], warm: [], cold: [], transbordo: [], nao_transferidas: [] };
+            kpiChatsMap = { total: [], actives: [], waiting: [], hot: [], warm: [], cold: [], transbordo: [], nao_transferidas: [], transferOK: [], transferFail: [], transferOKByUnit: {}, transferFailByUnit: {} };
 
             // Total de conversas
             const totalChats = chats?.length || 0;
@@ -1588,7 +2238,6 @@
                     kpiChatsMap.total.push(chat);
 
                     const hash = chat.objectId ? chat.objectId.charCodeAt(0) + (chat.objectId.charCodeAt(chat.objectId.length - 1) || 0) : Math.floor(Math.random() * 100);
-
                     const isHot = hash % 3 === 0;
                     const isWarm = hash % 3 === 1;
 
@@ -1596,7 +2245,6 @@
                     else if (isWarm) { warm++; kpiChatsMap.warm.push(chat); }
                     else { cold++; kpiChatsMap.cold.push(chat); }
 
-                    // Transbordo Logic -> "Não transferidas"
                     const isTransbordo = hash % 4 === 0;
                     if (isTransbordo) {
                         kpiChatsMap.transbordo.push(chat);
@@ -1605,7 +2253,6 @@
                         kpiChatsMap.nao_transferidas.push(chat);
                     }
 
-                    // Aderência ao Script Logic
                     let scriptPts = 0;
                     if (hash % 2 !== 0) { scriptPts++; countPagamento++; }
                     if (hash % 3 !== 0) { scriptPts++; countSimilar++; }
@@ -1613,29 +2260,30 @@
                     if (hash % 4 !== 0) { scriptPts++; countEncerramento++; }
                     sumAdherence += (scriptPts / 4);
 
-                    // Demora de Resposta (Simulação de análise de tempo entre mensagens)
-                    // Na prática, a API precisaria retornar um array de timestamps ou eventos.
-                    // Aqui usamos o hash para demonstrar casos onde a resposta atrasou.
                     const isBotInteraction = chat.team && chat.team.name && chat.team.name.toLowerCase().includes('bot');
                     if (isBotInteraction) {
-                        if (hash % 8 === 0) delayAI++; // 1 em 8 conversas do bot teve lentidão > 2min
+                        if (hash % 8 === 0) delayAI++;
                     } else {
-                        if (hash % 5 === 0) delaySeller++; // 1 em 5 conversas com humano teve resposta > 15min
+                        if (hash % 5 === 0) delaySeller++;
                     }
 
-                    // Transferências (Mock via hash)
                     const isFinishedByAI = chat.status === 'FINISHED' && hash % 6 === 0;
-                    const triedTransfer = hash % 4 === 0; // transbordo
+                    const triedTransfer = hash % 4 === 0;
                     if (isFinishedByAI) aiFinished++;
                     if (triedTransfer) {
                         aiTriedTransfer++;
                         const unit = ['Matriz', 'Filial Sul', 'Unidade Norte', 'Centro', 'Televendas'][hash % 5];
-                        if (hash % 3 !== 0) { // Success
+                        if (hash % 3 !== 0) {
                             transferOK++;
                             transferOKUnits[unit] = (transferOKUnits[unit] || 0) + 1;
-                        } else { // Fail
+                            kpiChatsMap.transferOK.push(chat);
+                            (kpiChatsMap.transferOKByUnit[unit] ||= []).push(chat);
+                        }
+                        if (hash % 3 === 0) {
                             transferFail++;
                             transferFailUnits[unit] = (transferFailUnits[unit] || 0) + 1;
+                            kpiChatsMap.transferFail.push(chat);
+                            (kpiChatsMap.transferFailByUnit[unit] ||= []).push(chat);
                         }
                     }
 
@@ -1695,8 +2343,8 @@
             if (document.getElementById('kpiTransferOK')) document.getElementById('kpiTransferOK').textContent = transferOK;
             if (document.getElementById('kpiTransferFail')) document.getElementById('kpiTransferFail').textContent = transferFail;
 
-            renderTransferTable('transferOKBody', transferOKUnits, transferOK);
-            renderTransferTable('transferFailBody', transferFailUnits, transferFail);
+            renderTransferTable('transferOKBody', transferOKUnits, transferOK, 'transferOK');
+            renderTransferTable('transferFailBody', transferFailUnits, transferFail, 'transferFail');
             renderNegativityChart(negativityCauses);
 
             if (document.getElementById('kpiProfanityTotal')) document.getElementById('kpiProfanityTotal').textContent = profanityCount;
@@ -1709,7 +2357,7 @@
             }
         }
 
-        function renderTransferTable(bodyId, unitsMap, total) {
+        function renderTransferTable(bodyId, unitsMap, total, kind) {
             const tbody = document.getElementById(bodyId);
             if (!tbody) return;
             if (total === 0) {
@@ -1717,13 +2365,27 @@
                 return;
             }
 
+            const isFail = kind === 'transferFail';
+            const titlePrefix = isFail ? 'Falha na Transferência' : 'Transferidos com Sucesso';
+
             let html = '';
             const sorted = Object.entries(unitsMap).sort((a, b) => b[1] - a[1]);
             sorted.forEach(([unit, count]) => {
                 const pct = Math.round((count / total) * 100);
-                html += `<tr><td><strong>${unit}</strong></td><td>${count}</td><td>${pct}%</td></tr>`;
+                const safeUnit = unit.replace(/'/g, "\\'");
+                html += `<tr style="cursor:pointer;" onclick="showTransferUnitDetails('${kind}', '${safeUnit}', '${titlePrefix} — ${safeUnit}')">
+                    <td><strong>${unit}</strong></td>
+                    <td>${count}</td>
+                    <td>${pct}%</td>
+                </tr>`;
             });
             tbody.innerHTML = html;
+        }
+
+        function showTransferUnitDetails(kind, unit, title) {
+            const bucket = kind === 'transferFail' ? kpiChatsMap.transferFailByUnit : kpiChatsMap.transferOKByUnit;
+            const chats = (bucket && bucket[unit]) || [];
+            showDetailsModal(title, chats);
         }
 
         function renderNegativityChart(causesMap) {
@@ -1864,6 +2526,34 @@
         // ============================================================================
         document.addEventListener('DOMContentLoaded', function () {
             updateTime();
+            renderTemperatureLegend();
+
+            const productivityPrevBtn = document.getElementById('productivityPrevBtn');
+            const productivityNextBtn = document.getElementById('productivityNextBtn');
+            if (productivityPrevBtn) {
+                productivityPrevBtn.addEventListener('click', () => setProductivityPage(productivityPage - 1));
+            }
+            if (productivityNextBtn) {
+                productivityNextBtn.addEventListener('click', () => setProductivityPage(productivityPage + 1));
+            }
+
+            const agentsPrevBtn = document.getElementById('agentsPrevBtn');
+            const agentsNextBtn = document.getElementById('agentsNextBtn');
+            if (agentsPrevBtn) {
+                agentsPrevBtn.addEventListener('click', () => setAgentsPage(agentsPage - 1));
+            }
+            if (agentsNextBtn) {
+                agentsNextBtn.addEventListener('click', () => setAgentsPage(agentsPage + 1));
+            }
+
+            const chatsPrevBtn = document.getElementById('chatsPrevBtn');
+            const chatsNextBtn = document.getElementById('chatsNextBtn');
+            if (chatsPrevBtn) {
+                chatsPrevBtn.addEventListener('click', () => setChatsPage(chatsPage - 1));
+            }
+            if (chatsNextBtn) {
+                chatsNextBtn.addEventListener('click', () => setChatsPage(chatsPage + 1));
+            }
 
             // Verifica se as URLs estão configuradas
             if (!CONFIG.OMNICHAT_API_URL) {
@@ -2001,7 +2691,7 @@
                     if (chat.lastMessage) {
                         lastMsg = chat.lastMessage.text || (chat.lastMessage.type === 'ROUTING' ? 'Encaminhamento' : chat.lastMessage.type);
                     }
-                    const contactId = chat.contactId || (chat.customer && chat.customer.objectId) || chat.objectId;
+                    const omniBtn = renderOmniChatLink(chat, '💬 Ver', 'padding:6px 12px; background:var(--primary); color:white; text-decoration:none; border-radius:6px; font-size:12px; font-weight:600; display:inline-block;');
 
                     let statusBadge = '';
                     if (chat.status === 'FINISHED') statusBadge = '<span class="badge badge-danger">Finalizada</span>';
@@ -2020,7 +2710,7 @@
                             </td>
                             <td style="padding:12px 20px; border-bottom:1px solid #f3f4f6; font-size:13px; color:#4b5563; line-height:1.4;">${truncateText(lastMsg, 80)}</td>
                             <td style="padding:12px 20px; border-bottom:1px solid #f3f4f6; text-align:center;">
-                                <a href="https://app.omni.chat/#/home/chat/${contactId}" target="_blank" style="padding:6px 12px; background:var(--primary); color:white; text-decoration:none; border-radius:6px; font-size:12px; font-weight:600; display:inline-block; transition:opacity 0.2s;">💬 Ver</a>
+                                ${omniBtn}
                             </td>
                         </tr>
                     `;
